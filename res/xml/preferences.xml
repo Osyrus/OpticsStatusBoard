@@ -11,7 +11,8 @@
         <EditTextPreference
             android:key="password"
             android:title="Password"
-            android:defaultValue="" />
+            android:defaultValue=""
+            android:inputType="textPassword" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="viewSettings"

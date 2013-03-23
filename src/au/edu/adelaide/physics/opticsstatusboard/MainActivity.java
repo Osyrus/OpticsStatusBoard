@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
     	final EditText input = new EditText(this);
     	input.setText(userInput);
     	// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-    	input.setInputType(InputType.TYPE_CLASS_TEXT);
+    	input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE);
     	builder.setView(input);
 
     	// Set up the buttons
