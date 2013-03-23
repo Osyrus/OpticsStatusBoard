@@ -39,6 +39,8 @@ public class Poster extends AsyncTask<Void, Void, String> {
 			while (inStream.hasNextLine()) {
 				response += inStream.nextLine();
 			}
+			
+//			System.out.println(response);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

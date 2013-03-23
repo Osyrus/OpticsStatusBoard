@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -44,6 +48,7 @@ public class MainActivity extends Activity {
 	private final int MAX_RETRIES = 3;
 	private int retries;
 	private String sortMode;
+	String userInput;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,14 +110,14 @@ public class MainActivity extends Activity {
         setMessageButton = (ImageButton) findViewById(R.id.setMessage);
         setMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View v) {
-				
+				showMessageDialog(0);
 			}
 		});
         
         setBackMessageButton = (Button) findViewById(R.id.setBackMessage);
         setBackMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				
+				showMessageDialog(1);
 			}
 		});
         
@@ -193,8 +198,8 @@ public class MainActivity extends Activity {
     	}
     }
     
-    public void showMessageDialog(int messageType) {
-    	String userInput;
+    public void showMessageDialog(final int messageType) {
+    	refreshUserData();
     	String title;
     	
     	switch (messageType) {
@@ -212,21 +217,55 @@ public class MainActivity extends Activity {
     		break;
     	}
     	
-    	//Make a dialogue box to get the user input
-    	
-    	switch (messageType) {
-    	case 0:
-    		user.setMessage(userInput);
-    		postData();
-    		break;
-    	case 1:
-    		user.setBackMessage(userInput);
-    		postData();
-    		break;
-    	default:
-    		//Shouldn't ever get here...
-    		break;
-    	}
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle(title);
+
+    	// Set up the input
+    	final EditText input = new EditText(this);
+    	input.setText(userInput);
+    	// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+    	input.setInputType(InputType.TYPE_CLASS_TEXT);
+    	builder.setView(input);
+
+    	// Set up the buttons
+    	builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { 
+    	    @Override
+    	    public void onClick(DialogInterface dialog, int which) {
+    	        userInput = input.getText().toString();
+    	        
+    	        switch (messageType) {
+    	    	case 0:
+    	    		user.setMessage(userInput);
+    	    		if (!networking) {
+    	    			retries = MAX_RETRIES;
+    	    			postData();
+    	    		} else {
+    	    			retries = MAX_RETRIES + 1;
+    	    		}
+    	    		break;
+    	    	case 1:
+    	    		user.setBackMessage(userInput);
+    	    		if (!networking) {
+    	    			retries = MAX_RETRIES;
+    	    			postData();
+    	    		} else {
+    	    			retries = MAX_RETRIES + 1;
+    	    		}
+    	    		break;
+    	    	default:
+    	    		//Shouldn't ever get here...
+    	    		break;
+    	    	}
+    	    }
+    	});
+    	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+    	    @Override
+    	    public void onClick(DialogInterface dialog, int which) {
+    	        dialog.cancel();
+    	    }
+    	});
+
+    	builder.show();
     }
     
     public void setStatusButton(int status) {
