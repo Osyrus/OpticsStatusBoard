@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <PreferenceCategory
+        android:key="userdata"
+        android:title="User Information" >
+        <EditTextPreference
+            android:key="username"
+            android:title="Username"
+            android:defaultValue="" />
+        <EditTextPreference
+            android:key="password"
+            android:title="Password"
+            android:defaultValue="" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="viewSettings"
+        android:title="View Settings" >
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="@string/sortModeTitle"
+            android:enabled="true"
+            android:entries="@array/sortModeTypes"
+            android:entryValues="@array/sortModeValues"
+            android:key="sortMode"
+            android:selectable="true"
+            android:title="Sorting Mode" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
