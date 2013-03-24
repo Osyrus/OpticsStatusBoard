@@ -12,8 +12,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,6 +29,7 @@ public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
 	private URL website;
+	private URL updateWebsite;
 	private boolean networking;
 	private ListView peopleList;
 	private ImageButton refreshButton;
@@ -48,7 +47,7 @@ public class MainActivity extends Activity {
 	private final int MAX_RETRIES = 3;
 	private int retries;
 	private String sortMode;
-	String userInput;
+	private String userInput;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +64,7 @@ public class MainActivity extends Activity {
         
         try {
 			website = new URL("http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
+			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -194,11 +194,16 @@ public class MainActivity extends Activity {
 		});
         
         refreshList();
+        checkForUpdate();
     }
     
     public void refreshList() {
     	refreshUserData();
     	new WebParser(people, peopleAdapter, this, sortMode).execute(website);
+    }
+    
+    public void checkForUpdate() {
+    	new UpdateChecker(this).execute(updateWebsite);
     }
     
     public void postData() {
@@ -356,13 +361,7 @@ public class MainActivity extends Activity {
     		startActivity(new Intent(this, SettingsActivity.class));
     		return true;
     	case R.id.versionButton:
-    		PackageInfo packageInfo;
-    		try {
-				packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-	    		Toast.makeText(getApplicationContext(), "Current Version: v" + packageInfo.versionName, Toast.LENGTH_SHORT).show();
-			} catch (NameNotFoundException e) {
-				e.printStackTrace();
-			}
+    		checkForUpdate();
     	default:
     		return super.onOptionsItemSelected(item);
     	}
