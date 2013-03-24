@@ -20,31 +20,35 @@ public class Poster extends AsyncTask<Void, Void, String> {
 	}
 	
 	protected String doInBackground(Void... voids) {
-		String postData = personUnwrapper(activity.getUser());
+		Person user = activity.getUser();
 		String response = "";
 		
-		try {
-			urlCon = (HttpURLConnection) website.openConnection();
-			urlCon.setDoOutput(true);
-			urlCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			urlCon.setFixedLengthStreamingMode(postData.getBytes().length);
-			urlCon.setInstanceFollowRedirects(false);
-			
-			out = new PrintWriter(urlCon.getOutputStream());
-			out.print(postData);
-			out.close();
-			
-			Scanner inStream = new Scanner(urlCon.getInputStream());
-			
-			while (inStream.hasNextLine()) {
-				response += inStream.nextLine();
+		if (user != null) {
+			String postData = personUnwrapper(user);
+
+			try {
+				urlCon = (HttpURLConnection) website.openConnection();
+				urlCon.setDoOutput(true);
+				urlCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+				urlCon.setFixedLengthStreamingMode(postData.getBytes().length);
+				urlCon.setInstanceFollowRedirects(false);
+
+				out = new PrintWriter(urlCon.getOutputStream());
+				out.print(postData);
+				out.close();
+
+				Scanner inStream = new Scanner(urlCon.getInputStream());
+
+				while (inStream.hasNextLine()) {
+					response += inStream.nextLine();
+				}
+
+				//			System.out.println(response);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			
-//			System.out.println(response);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-	
+		
 		return response;
 	}
 	

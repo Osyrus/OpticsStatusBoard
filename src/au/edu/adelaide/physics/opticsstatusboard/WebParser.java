@@ -68,7 +68,7 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 		adapter.notifyDataSetChanged();
 		activity.enableRefreshButton();
 		
-		if (activity.getRetries() > 0) {
+		if (activity.getRetries() > 0 && activity.getUser() != null) {
 			if (newUser.equals(activity.getUser())) {
 				activity.setRetries(0);
 				activity.setNetworking(false);

@@ -74,8 +74,6 @@ public class MainActivity extends Activity {
         peopleAdapter = new PeopleArrayAdapter(this, people);
         peopleList.setAdapter(peopleAdapter);
         
-        refreshList();
-        
         peopleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
@@ -101,67 +99,100 @@ public class MainActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refresh_button);
         refreshButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking) {
+				if (!networking)
 					refreshList();
-				}
 			}
 		});
         
         setMessageButton = (ImageButton) findViewById(R.id.setMessage);
         setMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View v) {
-				showMessageDialog(0);
+				if (!networking)
+					if (user != null)
+						showMessageDialog(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         setBackMessageButton = (Button) findViewById(R.id.setBackMessage);
         setBackMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				showMessageDialog(1);
+				if (!networking)
+					if (user != null)
+						showMessageDialog(1);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         inButton = (ImageButton) findViewById(R.id.in_button);
         inButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(1);
+				if (!networking)
+					if (user != null)
+						setStatus(1);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         outButton = (ImageButton) findViewById(R.id.out_button);
         outButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(0);
+				if (!networking)
+					if (user != null)
+						setStatus(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         confButton = (ImageButton) findViewById(R.id.conf_button);
         confButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(0);
+				if (!networking)
+					if (user != null)
+						setStatus(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         lunchButton = (ImageButton) findViewById(R.id.lunch_button);
         lunchButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(0);
+				if (!networking)
+					if (user != null)
+						setStatus(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         sickButton = (ImageButton) findViewById(R.id.sick_button);
         sickButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(0);
+				if (!networking)
+					if (user != null)
+						setStatus(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
         
         vacButton = (ImageButton) findViewById(R.id.vac_button);
         vacButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				setStatus(0);
+				if (!networking)
+					if (user != null)
+						setStatus(0);
+					else
+						showToast("Invalid Username");
 			}
 		});
+        
+        refreshList();
     }
     
     public void refreshList() {
@@ -170,6 +201,7 @@ public class MainActivity extends Activity {
     }
     
     public void postData() {
+    	refreshUserData();
     	new Poster(website, this).execute();
     }
     
@@ -184,17 +216,13 @@ public class MainActivity extends Activity {
     
     public void setStatus(int status) {
     	refreshUserData();
-    	if (username.equals("") || password.equals("")) {
-    		Toast.makeText(getApplicationContext(), "No stored Username or Password", Toast.LENGTH_SHORT).show();
+    	setStatusButton(status);
+    	user.setStatus(status);
+    	if (!networking) {
+    		retries = MAX_RETRIES;
+    		postData();
     	} else {
-    		setStatusButton(status);
-    		user.setStatus(status);
-    		if (!networking) {
-    			retries = MAX_RETRIES;
-    			postData();
-    		} else {
-    			retries = MAX_RETRIES + 1;
-    		}
+    		retries = MAX_RETRIES + 1;
     	}
     }
     
@@ -266,6 +294,10 @@ public class MainActivity extends Activity {
     	});
 
     	builder.show();
+    }
+    
+    public void showToast(String data) {
+    	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
     }
     
     public void setStatusButton(int status) {
