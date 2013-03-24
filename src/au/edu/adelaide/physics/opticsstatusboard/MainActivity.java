@@ -78,22 +78,23 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Context context = parent.getContext();
-				Person clickedPerson = people.get(position);
-				
-				PersonDetailDialog detailDialog = new PersonDetailDialog(context);
-				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View personDetailView = inflater.inflate(R.layout.person_detail, null, false);
-				detailDialog.setContentView(personDetailView);
-				detailDialog.setTitle(clickedPerson.getName());
-				
-				ListView personDetailList = (ListView) detailDialog.findViewById(R.id.personDetailList);
-				PersonDetailAdapter detailAdapter = new PersonDetailAdapter(context, clickedPerson.getInfoContainer());
-				personDetailList.setAdapter(detailAdapter);
-				
-				detailDialog.show();
+				if (!networking) {
+					Context context = parent.getContext();
+					Person clickedPerson = people.get(position);
+
+					PersonDetailDialog detailDialog = new PersonDetailDialog(context);
+					LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					View personDetailView = inflater.inflate(R.layout.person_detail, null, false);
+					detailDialog.setContentView(personDetailView);
+					detailDialog.setTitle(clickedPerson.getName());
+
+					ListView personDetailList = (ListView) detailDialog.findViewById(R.id.personDetailList);
+					PersonDetailAdapter detailAdapter = new PersonDetailAdapter(context, clickedPerson.getInfoContainer());
+					personDetailList.setAdapter(detailAdapter);
+
+					detailDialog.show();
+				}
 			}
-        	
         });
         
         refreshButton = (ImageButton) findViewById(R.id.refresh_button);
@@ -351,6 +352,7 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.action_settings:
+    		setNetworking(false);
     		startActivity(new Intent(this, SettingsActivity.class));
     		return true;
     	case R.id.versionButton:

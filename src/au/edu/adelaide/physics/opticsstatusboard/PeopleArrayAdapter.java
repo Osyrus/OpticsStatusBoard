@@ -27,33 +27,35 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 		TextView textView = (TextView) personRow.findViewById(R.id.personName);
 		ImageView imageView = (ImageView) personRow.findViewById(R.id.personStatus);
 		
-		Person current = people.get(position);
-		
-		switch (current.getStatus()) {
-		case 0:
-			imageView.setImageResource(R.drawable.in);
-			break;
-		case 1:
-			imageView.setImageResource(R.drawable.out);
-			break;
-		case 2:
-			imageView.setImageResource(R.drawable.meeting);
-			break;
-		case 3:
-			imageView.setImageResource(R.drawable.lunch);
-			break;
-		case 4:
-			imageView.setImageResource(R.drawable.sick);
-			break;
-		case 5:
-			imageView.setImageResource(R.drawable.vacation);
-			break;
-		default:
-			imageView.setImageResource(R.drawable.out);
-			break;
+		if (!activity.isNetworking()) {
+			Person current = people.get(position);
+
+			switch (current.getStatus()) {
+			case 0:
+				imageView.setImageResource(R.drawable.in);
+				break;
+			case 1:
+				imageView.setImageResource(R.drawable.out);
+				break;
+			case 2:
+				imageView.setImageResource(R.drawable.meeting);
+				break;
+			case 3:
+				imageView.setImageResource(R.drawable.lunch);
+				break;
+			case 4:
+				imageView.setImageResource(R.drawable.sick);
+				break;
+			case 5:
+				imageView.setImageResource(R.drawable.vacation);
+				break;
+			default:
+				imageView.setImageResource(R.drawable.out);
+				break;
+			}
+
+			textView.setText(current.getName());
 		}
-		
-		textView.setText(current.getName());
 		
 		return personRow;
 	}

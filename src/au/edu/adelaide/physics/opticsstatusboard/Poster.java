@@ -6,6 +6,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import android.os.AsyncTask;
 
 public class Poster extends AsyncTask<Void, Void, String> {
@@ -43,9 +48,9 @@ public class Poster extends AsyncTask<Void, Void, String> {
 					response += inStream.nextLine();
 				}
 
-				//			System.out.println(response);
+//				System.out.println(response);
 			} catch (IOException e) {
-				e.printStackTrace();
+				return "IOError";
 			}
 		}
 		
@@ -57,7 +62,42 @@ public class Poster extends AsyncTask<Void, Void, String> {
 	}
 	
 	protected void onPostExecute(String response) {
-		activity.refreshList();
+		Document parsedData = Jsoup.parse(response);
+	    Element mainBody = parsedData.body();
+	    
+	    //Check for success
+	    Elements bElements = mainBody.getElementsByTag("b");
+	    Element bCheck = bElements.last();
+	    String successCase1 = "No Messages";
+	    String successCase2 = "New status was saved successfully";
+	    
+	    //Check for password invalid
+	    Elements formElements = mainBody.getElementsByTag("form");
+	    String passwordCheck = formElements.attr("method");
+	    
+//	    System.out.println(passwordCheck);
+	    
+	    if (bCheck != null) {
+	    	String successCheck = bCheck.html();
+	    	if (successCheck.equals(successCase1) || successCheck.equals(successCase2)) {
+		    	activity.showToast("Success!");
+		    	activity.refreshList();
+	    	}
+	    } else if (passwordCheck.equals("POST")) {
+	    	activity.showToast("Invalid Password");
+	    	activity.setRetries(0);
+	    	activity.refreshList();
+	    } else if (response.equals("IOError")) {
+	    	if (activity.getRetries() == 0) {
+	    		activity.showToast("Timed out");
+	    		activity.refreshList();
+	    	} else {
+	    		activity.setNetworking(true);
+	    		System.out.println("Attempting post again");
+	    		activity.decRetries();
+	    		activity.postData();
+	    	}
+	    }
 	}
 	
 	private String personUnwrapper(Person person) {

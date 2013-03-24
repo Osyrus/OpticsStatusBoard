@@ -53,7 +53,11 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 			e.printStackTrace();
 		}
 		
-		parse();
+		if (data == null) {
+			return null;
+		} else {
+			parse();
+		}
 		
 		return getPeople();
 	}
