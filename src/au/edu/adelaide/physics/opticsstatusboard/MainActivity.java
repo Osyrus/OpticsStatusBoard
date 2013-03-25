@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
 	private int retries;
 	private String sortMode;
 	private String userInput;
+	private String webAddress;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +64,7 @@ public class MainActivity extends Activity {
         peopleList = (ListView) findViewById(R.id.peopleList);
         
         try {
-			website = new URL("http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
+			website = new URL(webAddress);
 			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -218,6 +219,7 @@ public class MainActivity extends Activity {
         username = settings.getString("username", "");
         password = settings.getString("password", "");
         sortMode = settings.getString("sortMode", "2");
+        webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
     }
     
     public void setStatus(int status) {
@@ -362,6 +364,19 @@ public class MainActivity extends Activity {
     		return true;
     	case R.id.versionButton:
     		checkForUpdate();
+    		return true;
+    	case R.id.setStatusOption:
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        	builder.setTitle("Choose Status");
+        	builder.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int selectedStatus) {
+					setStatus(selectedStatus);
+					dialog.dismiss();
+				}
+			});
+        	builder.show();
+        	return true;
     	default:
     		return super.onOptionsItemSelected(item);
     	}
@@ -378,6 +393,7 @@ public class MainActivity extends Activity {
     	editor.putString("username", username);
     	editor.putString("password", password);
     	editor.putString("sortMode", sortMode);
+    	editor.putString("webAddress", webAddress);
     	
     	//Commit the changes
     	editor.commit();

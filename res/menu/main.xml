@@ -1,15 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
             
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/setStatusOption"
         android:orderInCategory="1"
         android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:title="@string/setStatusOption" />
+    
     <item
         android:id="@+id/versionButton"
+        android:orderInCategory="99"
+        android:showAsAction="never"
+        android:title="@string/versionButton" />
+    
+    <item
+        android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="@string/versionButton">
-</item>
+        android:title="@string/action_settings" />
 
 </menu>

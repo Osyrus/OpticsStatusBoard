@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="8"
+    android:versionCode="9"
     android:versionName="@string/version" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk
@@ -26,12 +26,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity android:label="Settings" android:theme="@style/AppBaseTheme" android:name="SettingsActivity">
             <intent-filter android:label="settingsPage">
                 <action android:name="android.intent.action.SETTINGS" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <receiver android:name="ToggleWidget" >
+        	<intent-filter>
+            	<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        	</intent-filter>
+
+        	<meta-data
+            	android:name="android.appwidget.provider"
+            	android:resource="@xml/toggle_widget_info" />
+    	</receiver>
+    	
     </application>
 
 </manifest>

@@ -11,5 +11,13 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+    <string-array name="statusOptions">
+        <item>In</item>
+        <item>Out</item>
+        <item>At a Conference</item>
+        <item>Out to Lunch</item>
+        <item>Sick :(</item>
+        <item>On Vacation :)</item>
+    </string-array>
     
 </resources>
