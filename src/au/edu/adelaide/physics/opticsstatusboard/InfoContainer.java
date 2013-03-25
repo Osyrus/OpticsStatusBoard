@@ -1,8 +1,7 @@
 package au.edu.adelaide.physics.opticsstatusboard;
 
 public class InfoContainer {
-	private String title;
-	private String contents;
+	private String title, contents;
 	private int infoType;
 	
 	public InfoContainer(String title, String contents, int infoType) {

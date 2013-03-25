@@ -1,15 +1,9 @@
 package au.edu.adelaide.physics.opticsstatusboard;
 
 public class Person {
-	private String firstName;
+	private String firstName, lastName, mob, email, backMessage, message, username;
 	private int status;
-	private String lastName;
 	private boolean hasMessage;
-	private String mob;
-	private String email;
-	private String backMessage;
-	private String message;
-	private String username;
 	
 	public Person(String firstName, String lastName, String username, boolean hasMessage, String mob, String email, int status, String backMessage, String message) {
 		this.firstName = firstName;

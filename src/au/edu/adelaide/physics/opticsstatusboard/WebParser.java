@@ -19,15 +19,13 @@ import android.widget.ArrayAdapter;
 public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 	private BufferedReader input;
 	private String data;
-	private Elements cols;
-	private Elements rows;
-	private int numPeople;
+	private Elements cols, rows;
+	private int numPeople, sortMode;
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> adapter;
 	private MainActivity activity;
 	private Person newUser;
 	private boolean loggedIn;
-	private int sortMode;
 	
 	public WebParser(ArrayList<Person> people, ArrayAdapter<Person> adapter, MainActivity activity, String sortMode) {
 		this.people = people;

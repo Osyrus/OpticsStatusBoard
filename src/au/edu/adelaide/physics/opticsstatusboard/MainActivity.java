@@ -28,27 +28,15 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
-	private URL website;
-	private URL updateWebsite;
+	private URL website, updateWebsite;
 	private boolean networking;
 	private ListView peopleList;
-	private ImageButton refreshButton;
-	private ImageButton inButton;
-	private ImageButton outButton;
-	private ImageButton confButton;
-	private ImageButton lunchButton;
-	private ImageButton sickButton;
-	private ImageButton vacButton;
-	private ImageButton setMessageButton;
+	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
 	private Button setBackMessageButton;
 	private Person user;
-	private String username;
-	private String password;
+	private String username, password, sortMode, userInput, webAddress;
 	private final int MAX_RETRIES = 3;
 	private int retries;
-	private String sortMode;
-	private String userInput;
-	private String webAddress;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
