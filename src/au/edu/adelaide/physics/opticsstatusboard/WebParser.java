@@ -66,14 +66,14 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 	}
 	
 	protected void onPostExecute(ArrayList<Person> people) {
-		sort();
-		adapter.notifyDataSetChanged();
-		activity.enableRefreshButton();
 		
 		if (activity.getRetries() > 0 && activity.getUser() != null) {
 			if (newUser.equals(activity.getUser())) {
 				activity.setRetries(0);
 				activity.setNetworking(false);
+				sort();
+				activity.enableRefreshButton();
+				adapter.notifyDataSetChanged();
 			} else {
 				activity.decRetries();
 				activity.postData();
@@ -84,6 +84,9 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 				activity.setUser(newUser);
 				activity.setStatusButton(newUser.getStatus());
 			}
+			sort();
+			activity.enableRefreshButton();
+			adapter.notifyDataSetChanged();
 		}
 	}
 	

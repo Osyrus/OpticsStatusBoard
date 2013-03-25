@@ -59,6 +59,7 @@ public class Poster extends AsyncTask<Void, Void, String> {
 	
 	protected void onPreExecute() {
 		activity.setNetworking(true);
+		activity.disableRefreshButton();
 	}
 	
 	protected void onPostExecute(String response) {
