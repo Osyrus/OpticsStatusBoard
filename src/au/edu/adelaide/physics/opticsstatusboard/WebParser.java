@@ -21,7 +21,7 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 	private String data;
 	private Elements cols, rows;
 	private int numPeople, sortMode;
-	private ArrayList<Person> people;
+	private ArrayList<Person> people, newList;
 	private ArrayAdapter<Person> adapter;
 	private MainActivity activity;
 	private Person newUser;
@@ -65,7 +65,9 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 		activity.disableRefreshButton();
 	}
 	
-	protected void onPostExecute(ArrayList<Person> people) {
+	protected void onPostExecute(ArrayList<Person> newList) {
+		people.clear();
+		people.addAll(newList);
 		
 		if (activity.getRetries() > 0 && activity.getUser() != null) {
 			if (newUser.equals(activity.getUser())) {
@@ -101,7 +103,7 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 	
 	private ArrayList<Person> getPeople() {
 		//Clear the array for all the people
-		people.clear();
+		newList = new ArrayList<Person>(numPeople);
 		
 		//Populate the array with new people
 		for (int j = 2; j < (numPeople+2); j++) {
@@ -159,11 +161,12 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 			if (username.equals(activity.getUsername())) {
 				newUser = newPerson;
 				loggedIn = true;
+			} else {
+				newList.add(newPerson);
 			}
-			people.add(newPerson);
 		}
 		
-		return people;
+		return newList;
 	}
 	
 	private void sort() {
