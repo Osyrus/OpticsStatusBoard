@@ -161,6 +161,8 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 			if (username.equals(activity.getUsername())) {
 				newUser = newPerson;
 				loggedIn = true;
+				if (activity.canShowNameInList())
+					newList.add(newPerson);
 			} else {
 				newList.add(newPerson);
 			}

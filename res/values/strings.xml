@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-   	<string name="version">1.1.7</string>
    	<string name="versionButton">Check for Updates</string>
     <string name="app_name">Optics Status Board</string>
     <string name="action_settings">Settings</string>
@@ -19,5 +18,11 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="setStatusOption">Set Status</string>
+    <string name="setSignOutTime">Set Signout Reminder</string>
+    <string name="notificationsOnOff">Enable Notifications</string>
+    <string name="signOutTime">Set Signout Notification Time</string>
+    <string name="statusOption">Set Status</string>
+    <string name="signoutNotification">Optics Signout Notification</string>
+    <string name="vibrateEnable">Enable Vibration Alert</string>
 
 </resources>

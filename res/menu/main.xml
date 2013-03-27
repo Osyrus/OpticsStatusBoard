@@ -7,6 +7,12 @@
         android:title="@string/setStatusOption" />
     
     <item
+        android:id="@+id/setSignOutTime"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/setSignOutTime" />
+    
+    <item
         android:id="@+id/versionButton"
         android:orderInCategory="99"
         android:showAsAction="never"

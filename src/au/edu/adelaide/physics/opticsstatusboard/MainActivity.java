@@ -3,11 +3,15 @@ package au.edu.adelaide.physics.opticsstatusboard;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,20 +27,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
 	private URL website, updateWebsite;
-	private boolean networking;
+	private boolean networking, canNotify, statusChanged, canVibrate, showNameInList;
 	private ListView peopleList;
 	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
 	private Button setBackMessageButton;
 	private Person user;
 	private String username, password, sortMode, userInput, webAddress;
 	private final int MAX_RETRIES = 3;
-	private int retries;
+	private int retries, signOutHour, signOutMinute;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +53,11 @@ public class MainActivity extends Activity {
         networking = false;
         website = null;
         retries = 0;
+        statusChanged = true;
         
         peopleList = (ListView) findViewById(R.id.peopleList);
+        
+        new OnAlarmReceiver();
         
         try {
 			website = new URL(webAddress);
@@ -189,6 +197,11 @@ public class MainActivity extends Activity {
     public void refreshList() {
     	refreshUserData();
     	new WebParser(people, peopleAdapter, this, sortMode).execute(website);
+    	
+    	if (user != null && statusChanged) {
+    		setSignOutAlarm();
+    		statusChanged = false;
+    	}
     }
     
     public void checkForUpdate() {
@@ -200,6 +213,43 @@ public class MainActivity extends Activity {
     	new Poster(website, this).execute();
     }
     
+    public void setSignOutTime(int hour, int min) {
+    	signOutHour = hour;
+    	signOutMinute = min;
+    	setUserData();
+    	
+    	if (user != null) {
+    		setSignOutAlarm();
+    	}
+    }
+    
+    public void setSignOutAlarm() {
+    	AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    	Intent alarmIntent = new Intent(this, OnAlarmReceiver.class);
+    	alarmIntent.putExtra("status", getUser().getStatus());
+    	alarmIntent.putExtra("canNotify", canNotify);
+    	alarmIntent.putExtra("canVibrate", canVibrate);
+    	PendingIntent alarmPending = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	
+    	Calendar cal = Calendar.getInstance();
+    	cal.set(Calendar.HOUR_OF_DAY, signOutHour);
+    	cal.set(Calendar.MINUTE, signOutMinute);
+    	cal.set(Calendar.SECOND, 0);
+    	long trigger = cal.getTimeInMillis();
+    	
+    	if (trigger <= System.currentTimeMillis()) {
+    		trigger += AlarmManager.INTERVAL_DAY;
+    	}
+//    	System.out.println("Trigger time in ms: "+trigger);
+    	
+    	alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger, AlarmManager.INTERVAL_DAY, alarmPending);
+    }
+    
+    public int[] getSignOutTime() {
+    	int[] out = {signOutHour, signOutMinute};
+    	return out;
+    }
+    
     public void refreshUserData() {
     	//Get the saved preferences
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
@@ -208,6 +258,11 @@ public class MainActivity extends Activity {
         password = settings.getString("password", "");
         sortMode = settings.getString("sortMode", "2");
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
+        canNotify = settings.getBoolean("notificationEnabled", false);
+        canVibrate = settings.getBoolean("canVibrate", true);
+        showNameInList = settings.getBoolean("showName", false);
+        signOutHour = settings.getInt("signOutHour", 18);
+        signOutMinute = settings.getInt("signOutMin", 0);
     }
     
     public void setStatus(int status) {
@@ -220,6 +275,7 @@ public class MainActivity extends Activity {
     	} else {
     		retries = MAX_RETRIES + 1;
     	}
+    	statusChanged = true;
     }
     
     public void showMessageDialog(final int messageType) {
@@ -354,37 +410,56 @@ public class MainActivity extends Activity {
     		checkForUpdate();
     		return true;
     	case R.id.setStatusOption:
-    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        	builder.setTitle("Choose Status");
-        	builder.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
+    		AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);
+        	
+        	statusDialog.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int selectedStatus) {
 					setStatus(selectedStatus);
 					dialog.dismiss();
 				}
 			});
-        	builder.show();
+        	
+        	statusDialog.setTitle(R.string.statusOption);
+        	statusDialog.show();
+        	
         	return true;
+    	case R.id.setSignOutTime:
+    		refreshUserData();
+    		TimePickerDialog timePicker = new TimePickerDialog( this, new TimePickerDialog.OnTimeSetListener() {
+    			@Override
+    			public void onTimeSet(TimePicker view, int hour, int min) {
+    				setSignOutTime(hour, min);
+    			}
+    		}, signOutHour, signOutMinute, false);
+    		
+    		timePicker.setTitle(R.string.signOutTime);
+    		timePicker.show();
+    		
+    		return true;
     	default:
     		return super.onOptionsItemSelected(item);
     	}
     }
     
-    protected void onStop() {
-    	super.onStop();
-    	
+    public void setUserData() {
     	//Get the preferences
-    	SharedPreferences settings = getPreferences(0);
+    	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
     	SharedPreferences.Editor editor = settings.edit();
     	
     	//Save any changed data
-    	editor.putString("username", username);
-    	editor.putString("password", password);
-    	editor.putString("sortMode", sortMode);
     	editor.putString("webAddress", webAddress);
+    	editor.putInt("signOutHour", signOutHour);
+    	editor.putInt("signOutMin", signOutMinute);
     	
     	//Commit the changes
     	editor.commit();
+    }
+    
+    protected void onStop() {
+    	super.onStop();
+    	
+    	setUserData();
     }
     
     public String getUsername() {
@@ -416,6 +491,9 @@ public class MainActivity extends Activity {
     }
     public ArrayList<Person> getPeople() {
     	return people;
+    }
+    public boolean canShowNameInList() {
+    	return showNameInList;
     }
 }
 

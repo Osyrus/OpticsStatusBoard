@@ -7,13 +7,48 @@
         <EditTextPreference
             android:key="username"
             android:title="Username"
-            android:defaultValue="" />
+            android:defaultValue=""
+            android:summary="Set your username here" />
         <EditTextPreference
             android:key="password"
             android:title="Password"
             android:defaultValue=""
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:summary="Set your password here" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showName"
+            android:summaryOn="You will be included in the list"
+            android:summaryOff="You will not be included in the list"
+            android:title="Include me in the list" />
+	</PreferenceCategory>
+    
+    <PreferenceCategory
+        android:key="notificationSettings"
+        android:title="Notification Settings" >
+
+        <CheckBoxPreference 
+            android:title="@string/notificationsOnOff"
+            android:enabled="true"
+            android:defaultValue="false"
+            android:key="notificationEnabled"
+            android:summaryOn="Notifications will be displayed"
+            android:summaryOff="Notifications will not be displayed"
+            android:selectable="true" />
+        
+        <CheckBoxPreference
+            android:title="@string/vibrateEnable"
+            android:dependency="notificationEnabled"
+            android:enabled="true"
+            android:defaultValue="true"
+            android:key="canVibrate"
+            android:summaryOn="Vibration on notification is enabled"
+            android:summaryOff="Vibration on notification is disabled"
+            android:selectable="true" />
+        
     </PreferenceCategory>
+            
+    
     <PreferenceCategory
         android:key="viewSettings"
         android:title="View Settings" >
@@ -25,7 +60,8 @@
             android:entryValues="@array/sortModeValues"
             android:key="sortMode"
             android:selectable="true"
-            android:title="Sorting Mode" />
+            android:title="Sorting Mode"
+            android:summary="Select the sorting method for the list" />
 
     </PreferenceCategory>
 

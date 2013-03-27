@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="11"
-    android:versionName="@string/version" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:versionCode="12"
+    android:versionName="v1.1.8" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="17" />
     
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -43,6 +44,7 @@
             	android:name="android.appwidget.provider"
             	android:resource="@xml/toggle_widget_info" />
     	</receiver>
+        <receiver android:name="OnAlarmReceiver"></receiver>
     	
     </application>
 

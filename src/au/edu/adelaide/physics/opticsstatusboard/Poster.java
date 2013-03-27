@@ -94,7 +94,7 @@ public class Poster extends AsyncTask<Void, Void, String> {
 	    		activity.refreshList();
 	    	} else {
 	    		activity.setNetworking(true);
-	    		System.out.println("Attempting post again");
+//	    		System.out.println("Attempting post again");
 	    		activity.decRetries();
 	    		activity.postData();
 	    	}
