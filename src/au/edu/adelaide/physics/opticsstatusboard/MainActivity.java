@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
@@ -34,14 +35,15 @@ public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
 	private URL website, updateWebsite;
-	private boolean networking, canNotify, statusChanged, canVibrate, showNameInList;
+	private boolean networking, canNotify, statusChanged, canVibrate, showNameInList, newVersion;
 	private ListView peopleList;
 	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
 	private Button setBackMessageButton;
 	private Person user;
-	private String username, password, sortMode, userInput, webAddress;
+	private String username, password, sortMode, userInput, webAddress, updateFileURL;
 	private final int MAX_RETRIES = 3;
 	private int retries, signOutHour, signOutMinute;
+	private MenuItem versionButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +56,9 @@ public class MainActivity extends Activity {
         website = null;
         retries = 0;
         statusChanged = true;
+        newVersion = false;
+        
+        updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
         
         peopleList = (ListView) findViewById(R.id.peopleList);
         
@@ -206,6 +211,13 @@ public class MainActivity extends Activity {
     
     public void checkForUpdate() {
     	new UpdateChecker(this).execute(updateWebsite);
+    }
+    
+    public void notifyNewVersion() {
+    	showToast("New version available, download link available in menu");
+    	
+    	versionButton.setTitle("Download New Version");
+    	newVersion = true;
     }
     
     public void postData() {
@@ -397,6 +409,7 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        versionButton = menu.findItem(R.id.versionButton);
         return true;
     }
     
@@ -407,7 +420,13 @@ public class MainActivity extends Activity {
     		startActivity(new Intent(this, SettingsActivity.class));
     		return true;
     	case R.id.versionButton:
-    		checkForUpdate();
+    		if (!newVersion) {
+    			checkForUpdate();
+    		} else {
+    			Intent appDownload = new Intent(Intent.ACTION_VIEW);
+    			appDownload.setData(Uri.parse(updateFileURL));
+    			startActivity(appDownload);
+    		}
     		return true;
     	case R.id.setStatusOption:
     		AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);

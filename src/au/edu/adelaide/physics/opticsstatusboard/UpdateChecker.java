@@ -63,9 +63,9 @@ public class UpdateChecker extends AsyncTask<URL, Void, String[]>{
 			currentVersion = activity.getPackageManager().getPackageInfo(appId, 0).versionCode;
 			
 			if (Integer.parseInt(output[0]) > currentVersion) {
-				activity.showToast("New Version Available");
+				activity.notifyNewVersion();
 			} else {
-				activity.showToast("Currently up to Date");
+				activity.showToast("Currently up to date :)");
 			}
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
