@@ -11,21 +11,24 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import android.os.AsyncTask;
-
-public class Poster extends AsyncTask<Void, Void, String> {
+public class Poster {
 	private URL website;
 	private HttpURLConnection urlCon;
 	private PrintWriter out;
-	private MainActivity activity;
+	private int retries;
+	private Person user;
+	private BackgroundManager manager;
+	private String result;
 	
-	public Poster(URL website, MainActivity activity) {
+	public Poster(URL website, BackgroundManager manager) {
 		this.website = website;
-		this.activity = activity;
+		user = manager.getUser();
+		this.manager = manager;
 	}
 	
-	protected String doInBackground(Void... voids) {
-		Person user = activity.getUser();
+	public String postToWebsite() {
+		preExecute();
+		
 		String response = "";
 		
 		if (user != null) {
@@ -50,19 +53,20 @@ public class Poster extends AsyncTask<Void, Void, String> {
 
 //				System.out.println(response);
 			} catch (IOException e) {
-				return "IOError";
+				response = "IOError";
 			}
 		}
 		
-		return response;
+		postExecute(response);
+		return result;
 	}
 	
-	protected void onPreExecute() {
-		activity.setNetworking(true);
-		activity.disableRefreshButton();
+	private void preExecute() {
+//		activity.setNetworking(true);
+//		activity.disableRefreshButton();
 	}
 	
-	protected void onPostExecute(String response) {
+	private void postExecute(String response) {
 		Document parsedData = Jsoup.parse(response);
 	    Element mainBody = parsedData.body();
 	    
@@ -81,22 +85,22 @@ public class Poster extends AsyncTask<Void, Void, String> {
 	    if (bCheck != null) {
 	    	String successCheck = bCheck.html();
 	    	if (successCheck.equals(successCase1) || successCheck.equals(successCase2)) {
-		    	activity.showToast("Success!");
-		    	activity.refreshList();
+	    		result = "Success!";
+		    	manager.refreshList();
 	    	}
 	    } else if (passwordCheck.equals("POST")) {
-	    	activity.showToast("Invalid Password");
-	    	activity.setRetries(0);
-	    	activity.refreshList();
+	    	result = "Invalid Password";
+	    	retries = 0;
+	    	manager.refreshList();
 	    } else if (response.equals("IOError")) {
-	    	if (activity.getRetries() == 0) {
-	    		activity.showToast("Timed out");
-	    		activity.refreshList();
+	    	if (retries == 0) {
+	    		result = "Timed out";
+	    		manager.refreshList();
 	    	} else {
-	    		activity.setNetworking(true);
+//	    		activity.setNetworking(true);
 //	    		System.out.println("Attempting post again");
-	    		activity.decRetries();
-	    		activity.postData();
+	    		retries -= 1;
+	    		manager.postData();
 	    	}
 	    }
 	}
@@ -129,9 +133,9 @@ public class Poster extends AsyncTask<Void, Void, String> {
 		
 		temp += "&back=" + person.getBackMessage();
 		temp += "&message=" + person.getMessage();
-		temp += "&login=" + activity.getUsername();
+		temp += "&login=" + manager.getUsername();
 		temp += "&cmd=status";
-		temp += "&password=" + activity.getPassword();
+		temp += "&password=" + manager.getPassword();
 		
 		return temp;
 	}

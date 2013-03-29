@@ -1,9 +1,8 @@
 package au.edu.adelaide.physics.opticsstatusboard;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,10 +12,13 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,16 +36,15 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
-	private URL website, updateWebsite;
-	private boolean networking, canNotify, statusChanged, canVibrate, showNameInList, newVersion;
+	private boolean networking, canNotify, statusChanged, canVibrate, newVersion;
 	private ListView peopleList;
 	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
 	private Button setBackMessageButton;
 	private Person user;
-	private String username, password, sortMode, userInput, webAddress, updateFileURL;
-	private final int MAX_RETRIES = 3;
-	private int retries, signOutHour, signOutMinute;
+	private String userInput, webAddress, updateFileURL;
+	private int signOutHour, signOutMinute;
 	private MenuItem versionButton;
+	private BroadcastReceiver bReceiver;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,33 +52,53 @@ public class MainActivity extends Activity {
         
         refreshUserData();
         
-        user = null;
         networking = false;
-        website = null;
-        retries = 0;
         statusChanged = true;
         newVersion = false;
-        
-        updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
-        
+           
         peopleList = (ListView) findViewById(R.id.peopleList);
         
         new OnAlarmReceiver();
-        
-        try {
-			website = new URL(webAddress);
-			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
         
         people = new ArrayList<Person>(0);
         
         peopleAdapter = new PeopleArrayAdapter(this, people);
         peopleList.setAdapter(peopleAdapter);
         
+        bReceiver = new BroadcastReceiver() {
+            @SuppressWarnings("unchecked")
+			@Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals("BackgroundRefresh")) {
+    				Bundle data = intent.getExtras();
+                    
+                    if (data.containsKey("people")) {
+                    	people.clear();
+                    	people.addAll((Collection<? extends Person>) data.getParcelableArrayList("people"));
+                    	peopleAdapter.notifyDataSetChanged();
+                    }
+                    if (data.containsKey("user")) {
+                    	notifyUserUpdate((Person) data.getParcelable("user"));
+                    }
+                    if (data.containsKey("newVersion")) {
+                    	notifyNewVersion(data.getBoolean("newVersion"));
+                    }
+                    if (data.containsKey("postResult")) {
+                    	showToast((String) data.get("postResult"));
+                    }
+                    
+                    setNetworking(false);
+    				enableRefreshButton();
+                }
+            }
+        };
+        
+        LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(this);
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("BackgroundRefresh");
+		bManager.registerReceiver(bReceiver, intentFilter);
+        
         peopleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (!networking) {
@@ -195,34 +216,49 @@ public class MainActivity extends Activity {
 			}
 		});
         
-        refreshList();
-        checkForUpdate();
+        requestUpdateCheck();
     }
     
-    public void refreshList() {
-    	refreshUserData();
-    	new WebParser(people, peopleAdapter, this, sortMode).execute(website);
+    public void postUserUpdate() {
+    	Intent postIntent = new Intent(this, BackgroundManager.class);
+    	Bundle postData = new Bundle();
+    	postData.putParcelable("updatedUser", getUser());
+    	postIntent.putExtras(postData);
+    	startService(postIntent);
+		disableRefreshButton();
+		setNetworking(true);
+    }
+    public void requestUpdateCheck() {
+    	Intent updateCheckIntent = new Intent(this, BackgroundManager.class);
+    	updateCheckIntent.putExtra("requestVersionCheck", true);
+    	startService(updateCheckIntent);
+    	disableRefreshButton();
+    	setNetworking(true);
+    }
+    public void requestPeopleRefresh() {
+    	Intent refreshIntent = new Intent(this, BackgroundManager.class);
+    	startService(refreshIntent);
+    	disableRefreshButton();
+    	setNetworking(true);
+    }
+    
+    public void notifyNewVersion(boolean newVersion) {
+    	this.newVersion = newVersion;
     	
-    	if (user != null && statusChanged) {
-    		setSignOutAlarm();
-    		statusChanged = false;
+    	if (newVersion) {
+    		showToast("New version available, download link available in menu");
+    		versionButton.setTitle("Download New Version");
+    	} else {
+    		showToast("Currently up to date :)");
     	}
     }
     
-    public void checkForUpdate() {
-    	new UpdateChecker(this).execute(updateWebsite);
-    }
-    
-    public void notifyNewVersion() {
-    	showToast("New version available, download link available in menu");
+    public void notifyUserUpdate(Person user) {
+    	this.user = user;
     	
-    	versionButton.setTitle("Download New Version");
-    	newVersion = true;
-    }
-    
-    public void postData() {
-    	refreshUserData();
-    	new Poster(website, this).execute();
+//    	System.out.println("User received is "+user.getName());
+    	
+    	setStatusButton(user.getStatus());
     }
     
     public void setSignOutTime(int hour, int min) {
@@ -266,13 +302,9 @@ public class MainActivity extends Activity {
     	//Get the saved preferences
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         //Retrieve the username and password
-        username = settings.getString("username", "");
-        password = settings.getString("password", "");
-        sortMode = settings.getString("sortMode", "2");
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
         canNotify = settings.getBoolean("notificationEnabled", false);
         canVibrate = settings.getBoolean("canVibrate", true);
-        showNameInList = settings.getBoolean("showName", false);
         signOutHour = settings.getInt("signOutHour", 18);
         signOutMinute = settings.getInt("signOutMin", 0);
     }
@@ -282,12 +314,20 @@ public class MainActivity extends Activity {
     	setStatusButton(status);
     	user.setStatus(status);
     	if (!networking) {
-    		retries = MAX_RETRIES;
-    		postData();
-    	} else {
-    		retries = MAX_RETRIES + 1;
+    		postUserUpdate();
     	}
     	statusChanged = true;
+    }
+    
+    public void refreshList() {
+    	refreshUserData();
+    	
+    	requestPeopleRefresh();
+    	
+    	if (user != null && statusChanged) {
+    		setSignOutAlarm();
+    		statusChanged = false;
+    	}
     }
     
     public void showMessageDialog(final int messageType) {
@@ -329,19 +369,13 @@ public class MainActivity extends Activity {
     	    	case 0:
     	    		user.setMessage(userInput);
     	    		if (!networking) {
-    	    			retries = MAX_RETRIES;
-    	    			postData();
-    	    		} else {
-    	    			retries = MAX_RETRIES + 1;
+    	    			postUserUpdate();
     	    		}
     	    		break;
     	    	case 1:
     	    		user.setBackMessage(userInput);
     	    		if (!networking) {
-    	    			retries = MAX_RETRIES;
-    	    			postData();
-    	    		} else {
-    	    			retries = MAX_RETRIES + 1;
+    	    			postUserUpdate();
     	    		}
     	    		break;
     	    	default:
@@ -421,7 +455,7 @@ public class MainActivity extends Activity {
     		return true;
     	case R.id.versionButton:
     		if (!newVersion) {
-    			checkForUpdate();
+    			requestUpdateCheck();
     		} else {
     			Intent appDownload = new Intent(Intent.ACTION_VIEW);
     			appDownload.setData(Uri.parse(updateFileURL));
@@ -481,38 +515,14 @@ public class MainActivity extends Activity {
     	setUserData();
     }
     
-    public String getUsername() {
-    	return username;
-    }
-    public String getPassword() {
-    	return password;
-    }
-    public void setUser(Person person) {
-    	user = person;
-    }
     public void setNetworking(boolean networking) {
     	this.networking = networking;
     }
     public boolean isNetworking() {
     	return networking;
     }
-    public Person getUser() {
+    private Person getUser() {
     	return user;
-    }
-    public int getRetries() {
-    	return retries;
-    }
-    public void decRetries() {
-    	retries -= 1;
-    }
-    public void setRetries(int retries) {
-    	this.retries = retries;
-    }
-    public ArrayList<Person> getPeople() {
-    	return people;
-    }
-    public boolean canShowNameInList() {
-    	return showNameInList;
     }
 }
 

@@ -13,36 +13,39 @@ import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 
-import android.os.AsyncTask;
-import android.widget.ArrayAdapter;
-
-public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
+public class WebParser {
 	private BufferedReader input;
-	private String data;
+	private String data, actualUsername;
 	private Elements cols, rows;
 	private int numPeople, sortMode;
 	private ArrayList<Person> people, newList;
-	private ArrayAdapter<Person> adapter;
-	private MainActivity activity;
-	private Person newUser;
-	private boolean loggedIn;
+	private Person newUser, currentUser;
+	private boolean loggedIn, showNameInList;
+	private BackgroundManager manager;
 	
-	public WebParser(ArrayList<Person> people, ArrayAdapter<Person> adapter, MainActivity activity, String sortMode) {
+	public WebParser(ArrayList<Person> people, BackgroundManager manager, String sortMode) {
 		this.people = people;
-		this.adapter = adapter;
-		this.activity = activity;
+		this.manager = manager;
 		newUser = null;
 		loggedIn = false;
+		currentUser = manager.getUser();
+		actualUsername = manager.getUsername();
+		showNameInList = manager.canShowNameInList();
 		this.sortMode = Integer.parseInt(sortMode.replace("\""," ").trim());
 	}
 	
 	public ArrayList<Person> fetchPeople() {
 		return people;
 	}
+	public Person fetchUser() {
+		return currentUser;
+	}
 	
-	protected ArrayList<Person> doInBackground(URL... website) {
+	public void parseWebsite(URL website) {
+		preExecute();
+		
 		try {
-			input = new BufferedReader((new InputStreamReader(website[0].openStream())));
+			input = new BufferedReader((new InputStreamReader(website.openStream())));
 			input.readLine();
 			data = input.readLine();
 			input.close();
@@ -51,44 +54,35 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 			e.printStackTrace();
 		}
 		
-		if (data == null) {
-			return null;
-		} else {
+		if (data != null) {
 			parse();
 		}
 		
-		return getPeople();
+		postExecute(getPeople());
 	}
 	
-	protected void onPreExecute() {
-		activity.setNetworking(true);
-		activity.disableRefreshButton();
+	private void preExecute() {
+
 	}
 	
-	protected void onPostExecute(ArrayList<Person> newList) {
+	private void postExecute(ArrayList<Person> newList) {
 		people.clear();
 		people.addAll(newList);
 		
-		if (activity.getRetries() > 0 && activity.getUser() != null) {
-			if (newUser.equals(activity.getUser())) {
-				activity.setRetries(0);
-				activity.setNetworking(false);
+		if (manager.getRetries() > 0 && currentUser != null) {
+			if (newUser.equals(currentUser)) {
+				manager.setRetries(0);
 				sort();
-				activity.enableRefreshButton();
-				adapter.notifyDataSetChanged();
 			} else {
-				activity.decRetries();
-				activity.postData();
+				manager.decRetries();
+				manager.postData();
 			}
 		} else {
-			activity.setNetworking(false);
 			if (loggedIn) {
-				activity.setUser(newUser);
-				activity.setStatusButton(newUser.getStatus());
+//				manager.setUser(newUser);
+				currentUser = newUser;
 			}
 			sort();
-			activity.enableRefreshButton();
-			adapter.notifyDataSetChanged();
 		}
 	}
 	
@@ -158,10 +152,10 @@ public class WebParser extends AsyncTask<URL, Void, ArrayList<Person>>{
 			}
 			
 			Person newPerson = new Person(firstName, lastName, username, hasMessage, mob, email, status, backMessage, message);
-			if (username.equals(activity.getUsername())) {
+			if (username.equals(actualUsername)) {
 				newUser = newPerson;
 				loggedIn = true;
-				if (activity.canShowNameInList())
+				if (showNameInList)
 					newList.add(newPerson);
 			} else {
 				newList.add(newPerson);

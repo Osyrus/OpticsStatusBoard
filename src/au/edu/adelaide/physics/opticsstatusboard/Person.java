@@ -1,6 +1,9 @@
 package au.edu.adelaide.physics.opticsstatusboard;
 
-public class Person {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Person implements Parcelable {
 	private String firstName, lastName, mob, email, backMessage, message, username;
 	private int status;
 	private boolean hasMessage;
@@ -20,6 +23,33 @@ public class Person {
 		this.firstName = firstName;
 		this.status = status;
 	}
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel out, int flags) {
+		out.writeString(firstName);
+		out.writeString(lastName);
+		out.writeString(mob);
+		out.writeString(email);
+		out.writeString(backMessage);
+		out.writeString(message);
+		out.writeString(username);
+		out.writeInt(status);
+	}
+	
+	private Person(Parcel in) {
+		this.firstName = in.readString();
+		this.lastName = in.readString();
+		this.setMob(in.readString());
+		this.setEmail(in.readString());
+		this.setBackMessage(in.readString());
+		this.setMessage(in.readString());
+		this.username = in.readString();
+		this.status = in.readInt();
+    }
 	
 	public String getVerboseStatus() {
 		switch (status) {
@@ -61,6 +91,17 @@ public class Person {
 		
 		return info;
 	}
+	
+	public static final Parcelable.Creator<Person> CREATOR
+	= new Parcelable.Creator<Person>() {
+		public Person createFromParcel(Parcel in) {
+			return new Person(in);
+		}
+		
+		public Person[] newArray(int size) {
+			return new Person[size];
+		}
+	};
 	
 	public String getName() {
 		return firstName + " " + lastName;

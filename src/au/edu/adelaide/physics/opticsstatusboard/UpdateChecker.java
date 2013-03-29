@@ -11,24 +11,22 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
 
-public class UpdateChecker extends AsyncTask<URL, Void, String[]>{
-	private MainActivity activity;
+public class UpdateChecker {
+	private BackgroundManager manager;
 	private BufferedReader input;
 	private String data;
 	
-	public UpdateChecker(MainActivity activity) {
-		this.activity = activity;
+	public UpdateChecker(BackgroundManager manager) {
+		this.manager = manager;
 	}
 
-	@Override
-	protected String[] doInBackground(URL... updateWebsite) {
+	public void check(URL updateWebsite) {
 		String[] output = new String[1];
 		output[0] = "";
 		
 		try {
-			input = new BufferedReader((new InputStreamReader(updateWebsite[0].openStream())));
+			input = new BufferedReader((new InputStreamReader(updateWebsite.openStream())));
 			
 			boolean ok = true;
 			while (ok) {
@@ -53,19 +51,17 @@ public class UpdateChecker extends AsyncTask<URL, Void, String[]>{
 			e.printStackTrace();
 		}
 		
-		return output;
+		postExecute(output);
 	}
 
-	protected void onPostExecute(String[] output) {
+	private void postExecute(String[] output) {
 		int currentVersion;
 		String appId = "au.edu.adelaide.physics.opticsstatusboard";
 		try {
-			currentVersion = activity.getPackageManager().getPackageInfo(appId, 0).versionCode;
+			currentVersion = manager.getPackageManager().getPackageInfo(appId, 0).versionCode;
 			
 			if (Integer.parseInt(output[0]) > currentVersion) {
-				activity.notifyNewVersion();
-			} else {
-				activity.showToast("Currently up to date :)");
+				manager.notifyNewVersion(true);
 			}
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
