@@ -6,7 +6,8 @@
     <ListView
         android:id="@+id/personDetailList"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layoutAnimation="@anim/list_view_animation" >
     </ListView>
     
 </LinearLayout>

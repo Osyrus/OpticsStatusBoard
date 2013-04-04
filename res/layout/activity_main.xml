@@ -159,9 +159,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/topBar" />
-
-    
+        android:layout_below="@+id/topBar"
+        android:animateLayoutChanges="false"
+        android:layoutAnimation="@anim/list_view_animation" />
 
 </RelativeLayout>
 
