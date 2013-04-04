@@ -36,6 +36,9 @@
         android:layout_alignLeft="@+id/personName"
         android:layout_alignRight="@+id/personName"
         android:layout_below="@+id/personName"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:ellipsize="end"
         android:textSize="14sp"
         android:text="Persons Message" />
 
