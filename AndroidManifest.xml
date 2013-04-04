@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="15"
+    android:versionCode="16"
     android:versionName="@string/version" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk

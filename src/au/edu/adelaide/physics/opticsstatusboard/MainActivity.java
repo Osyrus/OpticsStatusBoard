@@ -56,6 +56,8 @@ public class MainActivity extends Activity {
         statusChanged = true;
         newVersion = false;
         statusButtonCurrent = 0;
+        
+        updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
            
         peopleList = (ListView) findViewById(R.id.peopleList);
         

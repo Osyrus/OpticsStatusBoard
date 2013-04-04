@@ -21,8 +21,7 @@ public class BackgroundManager extends IntentService {
 	private URL website, updateWebsite;
 	private boolean showNameInList, newVersion;
 	private Person user;
-	@SuppressWarnings("unused")
-	private String username, password, sortMode, webAddress, updateFileURL;
+	private String username, password, sortMode, webAddress;
 	public static final int MAX_RETRIES = 3;
 	private int retries;
 	
@@ -127,8 +126,6 @@ public class BackgroundManager extends IntentService {
         people = new ArrayList<Person>(0);
         
         refreshUserData();
-		
-		updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
 		
 		try {
 			website = new URL(webAddress);

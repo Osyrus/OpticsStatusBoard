@@ -65,8 +65,14 @@ public class UpdateChecker {
 			currentVersion = manager.getPackageManager().getPackageInfo(appId, 0).versionCode;
 			
 			if (updateServerAvailable) {
-				if (Integer.parseInt(output[0]) > currentVersion) {
-					manager.notifyNewVersion(true);
+				try {
+					if (Integer.parseInt(output[0]) > currentVersion) {
+						manager.notifyNewVersion(true);
+					}
+				} catch (NumberFormatException e) {
+//					System.out.println("Error in parsing");
+					updateServerAvailable = false;
+					e.printStackTrace();
 				}
 			} else {
 //				System.out.println("Couldn't contact update server");
