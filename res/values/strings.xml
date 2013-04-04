@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="version">v1.2.1</string>
    	<string name="versionButton">Check for Update</string>
     <string name="app_name">Optics Status Board</string>
+    <string name="appAuthor">Myles Clark</string>
     <string name="action_settings">Settings</string>
     <string name="refresh">Refresh</string>
     <string name="in">In</string>

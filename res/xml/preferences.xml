@@ -64,5 +64,10 @@
             android:summary="Select the sorting method for the list" />
 
     </PreferenceCategory>
+    
+    <PreferenceCategory android:key="aboutPref" android:title="About">
+        <Preference android:key="versionDisplay" android:title="Current Application Version" android:summary="@string/version" android:selectable="false" android:enabled="true"/>
+        <Preference android:key="authorDisplay" android:title="App Author" android:summary="@string/appAuthor" android:enabled="true" android:selectable="false"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>
