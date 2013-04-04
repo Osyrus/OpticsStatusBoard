@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 	private Button setBackMessageButton;
 	private Person user;
 	private String userInput, webAddress, updateFileURL;
-	private int signOutHour, signOutMinute;
+	private int signOutHour, signOutMinute, statusButtonCurrent;
 	private MenuItem versionButton;
 	private BroadcastReceiver bReceiver;
 
@@ -55,6 +55,7 @@ public class MainActivity extends Activity {
         networking = false;
         statusChanged = true;
         newVersion = false;
+        statusButtonCurrent = 0;
            
         peopleList = (ListView) findViewById(R.id.peopleList);
         
@@ -123,96 +124,63 @@ public class MainActivity extends Activity {
         refreshButton = (ImageButton) findViewById(R.id.refresh_button);
         refreshButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					refreshList();
+				refreshList();
 			}
 		});
         
         setMessageButton = (ImageButton) findViewById(R.id.setMessage);
         setMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(final View v) {
-				if (!networking)
-					if (user != null)
-						showMessageDialog(0);
-					else
-						showToast("Invalid Username");
+				showMessageDialog(0);
 			}
 		});
         
         setBackMessageButton = (Button) findViewById(R.id.setBackMessage);
         setBackMessageButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						showMessageDialog(1);
-					else
-						showToast("Invalid Username");
+				showMessageDialog(1);
 			}
 		});
         
         inButton = (ImageButton) findViewById(R.id.in_button);
         inButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(1);
-					else
-						showToast("Invalid Username");
+				setStatus(1);
 			}
 		});
         
         outButton = (ImageButton) findViewById(R.id.out_button);
         outButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(0);
-					else
-						showToast("Invalid Username");
+				setStatus(0);
 			}
 		});
         
         confButton = (ImageButton) findViewById(R.id.conf_button);
         confButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(0);
-					else
-						showToast("Invalid Username");
+				setStatus(0);
 			}
 		});
         
         lunchButton = (ImageButton) findViewById(R.id.lunch_button);
         lunchButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(0);
-					else
-						showToast("Invalid Username");
+				setStatus(0);
 			}
 		});
         
         sickButton = (ImageButton) findViewById(R.id.sick_button);
         sickButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(0);
-					else
-						showToast("Invalid Username");
+				setStatus(0);
 			}
 		});
         
         vacButton = (ImageButton) findViewById(R.id.vac_button);
         vacButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!networking)
-					if (user != null)
-						setStatus(0);
-					else
-						showToast("Invalid Username");
+				setStatus(0);
 			}
 		});
         
@@ -310,88 +278,96 @@ public class MainActivity extends Activity {
     }
     
     public void setStatus(int status) {
-    	refreshUserData();
-    	setStatusButton(status);
-    	user.setStatus(status);
-    	if (!networking) {
+    	if (user != null && !networking) {
+    		refreshUserData();
+    		setStatusButton(status);
+    		user.setStatus(status);
     		postUserUpdate();
+    		statusChanged = true;
+    	} else {
+			showToast("Invalid Username");
     	}
-    	statusChanged = true;
     }
     
     public void refreshList() {
-    	refreshUserData();
-    	
-    	requestPeopleRefresh();
-    	
-    	if (user != null && statusChanged) {
-    		setSignOutAlarm();
-    		statusChanged = false;
+    	if (!networking) {
+    		refreshUserData();
+
+    		requestPeopleRefresh();
+
+    		if (user != null && statusChanged) {
+    			setSignOutAlarm();
+    			statusChanged = false;
+    		}
     	}
     }
     
     public void showMessageDialog(final int messageType) {
-    	refreshUserData();
-    	String title;
-    	
-    	switch (messageType) {
-    	case 0:
-    		userInput = user.getMessage();
-    		title = "Enter your message";
-    		break;
-    	case 1:
-    		userInput = user.getBackMessage();
-    		title = "Enter when you will be back";
-    		break;
-    	default:
-    		userInput = "";
-    		title = "How did you even get here?";
-    		break;
+    	if (!networking && user != null) {
+    		refreshUserData();
+    		String title;
+
+    		switch (messageType) {
+    		case 0:
+    			userInput = user.getMessage();
+    			title = "Enter your message";
+    			break;
+    		case 1:
+    			userInput = user.getBackMessage();
+    			title = "Enter when you will be back";
+    			break;
+    		default:
+    			userInput = "";
+    			title = "How did you even get here?";
+    			break;
+    		}
+
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    		builder.setTitle(title);
+
+    		// Set up the input
+    		final EditText input = new EditText(this);
+    		input.setText(userInput);
+    		// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+    		input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE);
+    		builder.setView(input);
+
+    		// Set up the buttons
+    		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { 
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				userInput = input.getText().toString();
+
+    				switch (messageType) {
+    				case 0:
+    					user.setMessage(userInput);
+    					if (!networking) {
+    						postUserUpdate();
+    					}
+    					break;
+    				case 1:
+    					user.setBackMessage(userInput);
+    					if (!networking) {
+    						postUserUpdate();
+    					}
+    					break;
+    				default:
+    					//Shouldn't ever get here...
+    					break;
+    				}
+    			}
+    		});
+    		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				dialog.cancel();
+    			}
+    		});
+
+    		builder.show();
+    	} else {
+			showToast("Invalid Username");
     	}
-    	
-    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    	builder.setTitle(title);
-
-    	// Set up the input
-    	final EditText input = new EditText(this);
-    	input.setText(userInput);
-    	// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-    	input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE);
-    	builder.setView(input);
-
-    	// Set up the buttons
-    	builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { 
-    	    @Override
-    	    public void onClick(DialogInterface dialog, int which) {
-    	        userInput = input.getText().toString();
-    	        
-    	        switch (messageType) {
-    	    	case 0:
-    	    		user.setMessage(userInput);
-    	    		if (!networking) {
-    	    			postUserUpdate();
-    	    		}
-    	    		break;
-    	    	case 1:
-    	    		user.setBackMessage(userInput);
-    	    		if (!networking) {
-    	    			postUserUpdate();
-    	    		}
-    	    		break;
-    	    	default:
-    	    		//Shouldn't ever get here...
-    	    		break;
-    	    	}
-    	    }
-    	});
-    	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-    	    @Override
-    	    public void onClick(DialogInterface dialog, int which) {
-    	        dialog.cancel();
-    	    }
-    	});
-
-    	builder.show();
     }
     
     public void showToast(String data) {
@@ -399,34 +375,38 @@ public class MainActivity extends Activity {
     }
     
     public void setStatusButton(int status) {
-    	findViewById(R.id.in_button).setVisibility(View.GONE);
-    	findViewById(R.id.out_button).setVisibility(View.GONE);
-    	findViewById(R.id.conf_button).setVisibility(View.GONE);
-    	findViewById(R.id.lunch_button).setVisibility(View.GONE);
-    	findViewById(R.id.sick_button).setVisibility(View.GONE);
-    	findViewById(R.id.vac_button).setVisibility(View.GONE);
-    	
-    	switch (status) {
-    	case 0:
-    		findViewById(R.id.in_button).setVisibility(View.VISIBLE);
-    		break;
-    	case 1:
-    		findViewById(R.id.out_button).setVisibility(View.VISIBLE);
-    		break;
-    	case 2:
-    		findViewById(R.id.conf_button).setVisibility(View.VISIBLE);
-    		break;
-    	case 3:
-    		findViewById(R.id.lunch_button).setVisibility(View.VISIBLE);
-    		break;
-    	case 4:
-    		findViewById(R.id.sick_button).setVisibility(View.VISIBLE);
-    		break;
-    	case 5:
-    		findViewById(R.id.vac_button).setVisibility(View.VISIBLE);
-    		break;
-    	default:
-    		// TODO What should it do in this case?
+    	if (statusButtonCurrent != status) {
+    		statusButtonCurrent = status;
+    		
+    		findViewById(R.id.in_button).setVisibility(View.GONE);
+    		findViewById(R.id.out_button).setVisibility(View.GONE);
+    		findViewById(R.id.conf_button).setVisibility(View.GONE);
+    		findViewById(R.id.lunch_button).setVisibility(View.GONE);
+    		findViewById(R.id.sick_button).setVisibility(View.GONE);
+    		findViewById(R.id.vac_button).setVisibility(View.GONE);
+
+    		switch (status) {
+    		case 0:
+    			findViewById(R.id.in_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 1:
+    			findViewById(R.id.out_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 2:
+    			findViewById(R.id.conf_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 3:
+    			findViewById(R.id.lunch_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 4:
+    			findViewById(R.id.sick_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 5:
+    			findViewById(R.id.vac_button).setVisibility(View.VISIBLE);
+    			break;
+    		default:
+    			// TODO What should it do in this case?
+    		}
     	}
     }
     

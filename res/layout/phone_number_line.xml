@@ -19,6 +19,7 @@
         android:id="@+id/lineContent"
         android:layout_width="wrap_content"
         android:layout_height="52dp"
+        android:autoLink="phone"
         android:layout_toRightOf="@+id/lineTitle"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
