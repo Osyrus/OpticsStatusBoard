@@ -24,7 +24,8 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 		LayoutInflater inflator = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View personRow = inflator.inflate(R.layout.person_row, parent, false);
 		
-		TextView textView = (TextView) personRow.findViewById(R.id.personName);
+		TextView nameTextView = (TextView) personRow.findViewById(R.id.personName);
+		TextView messageTextView = (TextView) personRow.findViewById(R.id.personMessage);
 		ImageView imageView = (ImageView) personRow.findViewById(R.id.personStatus);
 		
 		if (!activity.isNetworking()) {
@@ -54,7 +55,8 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 				break;
 			}
 
-			textView.setText(current.getName());
+			nameTextView.setText(current.getName());
+			messageTextView.setText(current.getMessage());
 		}
 		
 		return personRow;

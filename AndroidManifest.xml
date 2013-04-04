@@ -44,6 +44,7 @@
             	android:name="android.appwidget.provider"
             	android:resource="@xml/toggle_widget_info" />
     	</receiver>
+    	
         <receiver android:name="OnAlarmReceiver"></receiver>
         <service android:name="BackgroundManager"></service>
     	

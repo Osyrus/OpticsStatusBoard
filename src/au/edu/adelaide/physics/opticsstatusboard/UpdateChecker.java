@@ -16,6 +16,7 @@ public class UpdateChecker {
 	private BackgroundManager manager;
 	private BufferedReader input;
 	private String data;
+	private boolean updateServerAvailable;
 	
 	public UpdateChecker(BackgroundManager manager) {
 		this.manager = manager;
@@ -41,6 +42,8 @@ public class UpdateChecker {
 			
 			input.close();
 			
+			updateServerAvailable = true;
+			
 			Document parsedData = Jsoup.parse(data);
 		    Element mainBody = parsedData.body();
 		    Elements currentVersion = mainBody.getElementsByTag("p");
@@ -49,6 +52,7 @@ public class UpdateChecker {
 		} catch (IOException e) {
 			System.out.println("IOException");
 			e.printStackTrace();
+			updateServerAvailable = false;
 		}
 		
 		postExecute(output);
@@ -60,8 +64,12 @@ public class UpdateChecker {
 		try {
 			currentVersion = manager.getPackageManager().getPackageInfo(appId, 0).versionCode;
 			
-			if (Integer.parseInt(output[0]) > currentVersion) {
-				manager.notifyNewVersion(true);
+			if (updateServerAvailable) {
+				if (Integer.parseInt(output[0]) > currentVersion) {
+					manager.notifyNewVersion(true);
+				}
+			} else {
+//				System.out.println("Couldn't contact update server");
 			}
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block

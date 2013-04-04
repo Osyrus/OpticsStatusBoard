@@ -19,7 +19,7 @@
     <TextView
         android:id="@+id/personName"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="30dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_margin="2dp"
@@ -27,5 +27,16 @@
         android:gravity="center_vertical"
         android:text="Persons Name"
         android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/personMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:gravity="center_vertical"
+        android:layout_alignLeft="@+id/personName"
+        android:layout_alignRight="@+id/personName"
+        android:layout_below="@+id/personName"
+        android:textSize="14sp"
+        android:text="Persons Message" />
 
 </RelativeLayout>
