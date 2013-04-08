@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -26,7 +27,7 @@ public class BackgroundManager extends IntentService {
 	private int retries;
 	
 	public BackgroundManager() {
-		super("backgroundService");
+		super("BackgroundService");
 	}
 		
 	@Override
@@ -38,7 +39,6 @@ public class BackgroundManager extends IntentService {
 		
 		//Set up the objects for returning data
 		Intent returnIntent = new Intent("BackgroundRefresh");
-		Intent refreshWidgetIntent = null;
 		Bundle returnData = new Bundle();
 		
 		//If the service has been sent an updated user, post the changes to the sign in page
@@ -60,48 +60,22 @@ public class BackgroundManager extends IntentService {
 			
 			//Check if a widget has requested a sign in/out
 			if (data.containsKey("widgetSignIn")) {
-				System.out.println("Widget requesting status change");
+//				System.out.println("Widget requesting status change");
 				
 				if (data.getBoolean("widgetSignIn")) {
 					user.setStatus(0);
+					System.out.println("Widget requesting sign in");
 				} else {
 					user.setStatus(1);
+					System.out.println("Widget requesting sign out");
 				}
 				postData();
 			}
-			
-			//Update any widgets
-			if (data.containsKey(AppWidgetManager.EXTRA_APPWIDGET_IDS)) {
-//				System.out.println("Widget update called");
-				
-				AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-				int[] allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-
-				for (int widgetId : allWidgetIds) {
-					RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.toggle_widget);
-
-					// Register an onClickListener to sign in
-					Intent signInIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
-					signInIntent.putExtra("widgetSignIn", true);
-					PendingIntent pendingSignInIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-					remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
-					//And to sign out
-					Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
-					signOutIntent.putExtra("widgetSignIn", false);
-					PendingIntent pendingSignOutIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-					remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
-
-					setWidgetImage(user.getStatus(), remoteViews);
-
-					appWidgetManager.updateAppWidget(widgetId, remoteViews);
-				}
-			}
-		} else {
-//			System.out.println("Refresh Widget Externally");
-			refreshWidgetIntent = new Intent(this.getApplicationContext(), ToggleWidget.class);
-			refreshWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 		}
-
+		
+		//Refresh the widget
+		updateWidget();
+		
 		//Put the data to be returned into the bundle
 		if (getPeople() != null)
 			returnData.putParcelableArrayList("people", getPeople());
@@ -111,8 +85,6 @@ public class BackgroundManager extends IntentService {
 		returnIntent.putExtras(returnData);
 		//Send off the intent
 		LocalBroadcastManager.getInstance(this).sendBroadcast(returnIntent);
-		if (refreshWidgetIntent != null)
-			LocalBroadcastManager.getInstance(this).sendBroadcast(refreshWidgetIntent);
 	}
 	
 	public void onCreate() {
@@ -144,7 +116,31 @@ public class BackgroundManager extends IntentService {
 ;    	people = parser.fetchPeople();
     }
     
-    public void setWidgetImage(int status, RemoteViews views) {
+    private void updateWidget() {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
+		ComponentName myWidget = new ComponentName(this.getApplicationContext(), ToggleWidget.class);
+		RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.toggle_widget);
+
+		// Register an onClickListener to sign in
+		if (user.getStatus() > 0) { 
+			Intent signInIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			signInIntent.putExtra("widgetSignIn", true);
+			PendingIntent pendingSignInIntent = PendingIntent.getService(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
+		} else {
+			//And to sign out
+			Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			signOutIntent.putExtra("widgetSignIn", false);
+			PendingIntent pendingSignOutIntent = PendingIntent.getService(getApplicationContext(), 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
+		}
+
+		setWidgetImage(user.getStatus(), remoteViews);
+		
+		appWidgetManager.updateAppWidget(myWidget, remoteViews);
+    }
+    
+    private void setWidgetImage(int status, RemoteViews views) {
     	views.setViewVisibility(R.id.inButtonW, View.GONE);
     	views.setViewVisibility(R.id.outButtonW, View.GONE);
     	views.setViewVisibility(R.id.confButtonW, View.GONE);
@@ -176,7 +172,7 @@ public class BackgroundManager extends IntentService {
     	}
     }
     
-    public void checkForUpdate() {
+    private void checkForUpdate() {
     	new UpdateChecker(this).check(updateWebsite);
     }
     
@@ -189,7 +185,7 @@ public class BackgroundManager extends IntentService {
     	return result;
     }
     
-    public void refreshUserData() {
+    private void refreshUserData() {
     	//Get the saved preferences
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         //Retrieve the username and password
