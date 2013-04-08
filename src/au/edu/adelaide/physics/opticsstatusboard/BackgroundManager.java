@@ -64,10 +64,10 @@ public class BackgroundManager extends IntentService {
 				
 				if (data.getBoolean("widgetSignIn")) {
 					user.setStatus(0);
-					System.out.println("Widget requesting sign in");
+//					System.out.println("Widget requesting sign in");
 				} else {
 					user.setStatus(1);
-					System.out.println("Widget requesting sign out");
+//					System.out.println("Widget requesting sign out");
 				}
 				postData();
 			}
@@ -136,8 +136,22 @@ public class BackgroundManager extends IntentService {
 		}
 
 		setWidgetImage(user.getStatus(), remoteViews);
+		setWidgetCounter(remoteViews);
 		
 		appWidgetManager.updateAppWidget(myWidget, remoteViews);
+    }
+    
+    private void setWidgetCounter(RemoteViews views) {
+    	Person current;
+    	int counter = 0;
+    	
+    	for (int i = 0; i < people.size(); i++) {
+    		current = people.get(i);
+    		if (current.getStatus() == 0)
+    			counter++;
+    	}
+    	
+    	views.setTextViewText(R.id.inCounterW, "In: "+Integer.toString(counter));
     }
     
     private void setWidgetImage(int status, RemoteViews views) {
