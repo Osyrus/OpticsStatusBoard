@@ -34,9 +34,9 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences settings, String key) {
-		System.out.println("Preference change detected");
+//		System.out.println("Preference change detected");
 		if (key.equals("locationEnabled")) {
-			System.out.println("Location enabled setting change detected");
+//			System.out.println("Location enabled setting change detected");
 			boolean enabled = settings.getBoolean("locationEnabled", false);
 			setLocationProximityService(enabled, this);
 		}

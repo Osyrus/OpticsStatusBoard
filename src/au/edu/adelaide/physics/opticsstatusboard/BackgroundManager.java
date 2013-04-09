@@ -24,7 +24,7 @@ import android.widget.Toast;
 public class BackgroundManager extends IntentService {
 	private ArrayList<Person> people;
 	private URL website, updateWebsite;
-	private boolean showNameInList, newVersion, locationEnabled, locationNotification, locationVibrate;
+	private boolean showNameInList, newVersion, locationEnabled, locationNotification, locationVibrate, reminderEnabled, reminderVibrate;
 	private Person user;
 	private String username, password, sortMode, webAddress;
 	public static final int MAX_RETRIES = 3;
@@ -82,9 +82,19 @@ public class BackgroundManager extends IntentService {
 					user.setStatus(1);
 				
 				if (locationNotification)
-					createLocationNotification(entered);
+					createNotification(0, entered);
 				
 				postData();
+			}
+			
+			//Check to see if fired by the alarm, and then send the required notification
+			if (data.containsKey("reminderAlarm") && reminderEnabled) {
+				if (reminderEnabled) {
+					if (!data.getBoolean("reminderAlarm")) {
+						if (user.getStatus() == 0)
+							createNotification(1, false);
+					}
+				}
 			}
 		}
 		
@@ -102,20 +112,41 @@ public class BackgroundManager extends IntentService {
 		LocalBroadcastManager.getInstance(this).sendBroadcast(returnIntent);
 	}
 	
-	private void createLocationNotification(boolean signin) {
+	private void createNotification(int type, boolean param) {
 		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(this);
 		nBuilder.setSmallIcon(R.drawable.ic_launcher);
 		
-		if (signin) {
-			nBuilder.setContentTitle("Location Based Signin");
-			nBuilder.setContentText("You are in proximity of the university and have thus been signed in.");
-		} else {
-			nBuilder.setContentTitle("Location Based Signout");
-			nBuilder.setContentText("You are out of proximity of the university and have thus been signed out.");
+		switch (type) {
+		case 0:
+			if (param) {
+				nBuilder.setContentTitle("Location Based Signin");
+				nBuilder.setContentText("You are in proximity of the university and have thus been signed in.");
+			} else {
+				nBuilder.setContentTitle("Location Based Signout");
+				nBuilder.setContentText("You are out of proximity of the university and have thus been signed out.");
+			}
+			
+			if (locationVibrate)
+				nBuilder.setVibrate(vibratePattern);
+			
+			break;
+		case 1:
+			if (param) {
+				nBuilder.setContentTitle("Signin Reminder");
+				nBuilder.setContentText("This is a reminder to sign in");
+			} else {
+				nBuilder.setContentTitle("Signout Reminder");
+				nBuilder.setContentText("This is a reminder to sign out");
+			}
+			
+			if (reminderVibrate)
+				nBuilder.setVibrate(vibratePattern);
+			
+			break;
+		default:
+			break;
 		}
 		
-		if (locationVibrate)
-			nBuilder.setVibrate(vibratePattern);
 
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(0, nBuilder.build());
@@ -249,6 +280,8 @@ public class BackgroundManager extends IntentService {
         locationEnabled = settings.getBoolean("locationEnabled", false);
         locationNotification = settings.getBoolean("locationNotification", false);
         locationVibrate = settings.getBoolean("locationVibrate", false);
+        reminderEnabled = settings.getBoolean("reminderEnabled", false);
+        reminderVibrate = settings.getBoolean("reminderVibrate", false);
     }
     
     public void notifyNewVersion(boolean newVersion) {

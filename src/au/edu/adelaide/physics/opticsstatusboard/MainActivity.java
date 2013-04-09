@@ -36,7 +36,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	private ArrayList<Person> people;
 	private ArrayAdapter<Person> peopleAdapter;
-	private boolean networking, canNotify, statusChanged, canVibrate, newVersion;
+	private boolean networking, statusChanged, newVersion, reminderEnabled;
 	private ListView peopleList;
 	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
 	private Button setBackMessageButton;
@@ -60,8 +60,6 @@ public class MainActivity extends Activity {
         updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
            
         peopleList = (ListView) findViewById(R.id.peopleList);
-        
-        new OnAlarmReceiver();
         
         people = new ArrayList<Person>(0);
         
@@ -187,6 +185,10 @@ public class MainActivity extends Activity {
 		});
         
         requestUpdateCheck();
+        
+    	if (user != null && reminderEnabled) {
+    		setSignOutAlarm();
+    	}
     }
     
     public void postUserUpdate() {
@@ -233,18 +235,17 @@ public class MainActivity extends Activity {
     	signOutMinute = min;
     	setUserData();
     	
-    	if (user != null) {
+    	if (user != null && reminderEnabled) {
     		setSignOutAlarm();
     	}
     }
     
     public void setSignOutAlarm() {
     	AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    	Intent alarmIntent = new Intent(this, OnAlarmReceiver.class);
-    	alarmIntent.putExtra("status", getUser().getStatus());
-    	alarmIntent.putExtra("canNotify", canNotify);
-    	alarmIntent.putExtra("canVibrate", canVibrate);
-    	PendingIntent alarmPending = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	
+    	Intent reminderIntent = new Intent(getApplicationContext(), BackgroundManager.class);
+    	reminderIntent.putExtra("reminderAlarm", false);
+		PendingIntent remPendingIntent = PendingIntent.getService(getApplicationContext(), 0, reminderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     	
     	Calendar cal = Calendar.getInstance();
     	cal.set(Calendar.HOUR_OF_DAY, signOutHour);
@@ -255,9 +256,8 @@ public class MainActivity extends Activity {
     	if (trigger <= System.currentTimeMillis()) {
     		trigger += AlarmManager.INTERVAL_DAY;
     	}
-//    	System.out.println("Trigger time in ms: "+trigger);
     	
-    	alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger, AlarmManager.INTERVAL_DAY, alarmPending);
+    	alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger, AlarmManager.INTERVAL_DAY, remPendingIntent);
     }
     
     public int[] getSignOutTime() {
@@ -270,8 +270,7 @@ public class MainActivity extends Activity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         //Retrieve the username and password
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
-        canNotify = settings.getBoolean("notificationEnabled", false);
-        canVibrate = settings.getBoolean("canVibrate", true);
+        reminderEnabled = settings.getBoolean("reminderEnabled", false);
         signOutHour = settings.getInt("signOutHour", 18);
         signOutMinute = settings.getInt("signOutMin", 0);
     }
@@ -458,10 +457,11 @@ public class MainActivity extends Activity {
         	return true;
     	case R.id.setSignOutTime:
     		refreshUserData();
+    		
     		TimePickerDialog timePicker = new TimePickerDialog( this, new TimePickerDialog.OnTimeSetListener() {
     			@Override
     			public void onTimeSet(TimePicker view, int hour, int min) {
-    				setSignOutTime(hour, min);
+   					setSignOutTime(hour, min);
     			}
     		}, signOutHour, signOutMinute, false);
     		
