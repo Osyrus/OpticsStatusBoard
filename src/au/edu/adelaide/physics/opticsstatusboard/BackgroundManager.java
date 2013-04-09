@@ -10,6 +10,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,7 +21,7 @@ import android.widget.Toast;
 public class BackgroundManager extends IntentService {
 	private ArrayList<Person> people;
 	private URL website, updateWebsite;
-	private boolean showNameInList, newVersion;
+	private boolean showNameInList, newVersion, locationEnabled, locationNotification, locationVibrate;
 	private Person user;
 	private String username, password, sortMode, webAddress;
 	public static final int MAX_RETRIES = 3;
@@ -45,7 +46,6 @@ public class BackgroundManager extends IntentService {
 		if (data != null) {
 			if (data.containsKey("updatedUser")) {
 				user = (Person) data.getParcelable("updatedUser");
-//				System.out.println("The user to post for is "+user.getName());
 				String result = postData();
 				returnData.putString("postResult", result);
 			}
@@ -60,14 +60,24 @@ public class BackgroundManager extends IntentService {
 			
 			//Check if a widget has requested a sign in/out
 			if (data.containsKey("widgetSignIn")) {
-//				System.out.println("Widget requesting status change");
-				
 				if (data.getBoolean("widgetSignIn")) {
 					user.setStatus(0);
-//					System.out.println("Widget requesting sign in");
 				} else {
 					user.setStatus(1);
-//					System.out.println("Widget requesting sign out");
+				}
+				postData();
+			}
+			
+			//Check if this intent was fired by the location proximity alert
+			if (data.containsKey(LocationManager.KEY_PROXIMITY_ENTERING) && locationEnabled) {
+				if (data.getBoolean(LocationManager.KEY_PROXIMITY_ENTERING)) {
+					user.setStatus(0);
+					System.out.println("Location service requesting sign in");
+					//Notify the user here
+				} else {
+					user.setStatus(1);
+					System.out.println("Location service requesting sign out");
+					//Also notify here
 				}
 				postData();
 			}
@@ -202,12 +212,15 @@ public class BackgroundManager extends IntentService {
     private void refreshUserData() {
     	//Get the saved preferences
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        //Retrieve the username and password
+        //Retrieve the required settings
         username = settings.getString("username", "").trim();
         password = settings.getString("password", "").trim();
         sortMode = settings.getString("sortMode", "2");
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
         showNameInList = settings.getBoolean("showName", false);
+        locationEnabled = settings.getBoolean("locationEnabled", false);
+        locationNotification = settings.getBoolean("locationNotification", false);
+        locationVibrate = settings.getBoolean("locationVibrate", false);
     }
     
     public void notifyNewVersion(boolean newVersion) {

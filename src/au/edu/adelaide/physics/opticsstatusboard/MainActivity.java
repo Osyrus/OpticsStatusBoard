@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
 				}
 			}
         });
-        
+            
         refreshButton = (ImageButton) findViewById(R.id.refresh_button);
         refreshButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -225,9 +225,6 @@ public class MainActivity extends Activity {
     
     public void notifyUserUpdate(Person user) {
     	this.user = user;
-    	
-//    	System.out.println("User received is "+user.getName());
-    	
     	setStatusButton(user.getStatus());
     }
     

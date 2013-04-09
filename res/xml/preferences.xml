@@ -24,34 +24,54 @@
 	</PreferenceCategory>
     
     <PreferenceCategory
-        android:key="notificationSettings"
-        android:title="Notification Settings" >
+        android:key="autoServices"
+        android:title="Autonomous Services" >
+        
+        <PreferenceScreen
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:key="locationSettings"
+            android:title="Location Service" >
+			
+			<SwitchPreference
+			    android:defaultValue="false"
+			    android:enabled="true"
+			    android:key="locationEnabled"
+			    android:selectable="true"
+			    android:summaryOff="Turn service on to automatically sign in and out when in range of the university"
+			    android:summaryOn="Service will automatically sign you in when in range of the university"
+			    android:switchTextOff="Off"
+			    android:switchTextOn="On"
+			    android:title="@string/locationEnable" />
 
-        <CheckBoxPreference 
-            android:title="@string/notificationsOnOff"
-            android:enabled="true"
-            android:defaultValue="false"
-            android:key="notificationEnabled"
-            android:summaryOn="Notifications will be displayed"
-            android:summaryOff="Notifications will not be displayed"
-            android:selectable="true" />
+			<CheckBoxPreference
+			    android:defaultValue="false"
+			    android:dependency="locationEnabled"
+			    android:disableDependentsState="false"
+			    android:enabled="true"
+			    android:key="locationNotification"
+			    android:selectable="true"
+			    android:summaryOff="Notifications will not be displayed"
+			    android:summaryOn="Notifications will be displayed"
+			    android:title="@string/notificationsOnOff" />
+			
+			<CheckBoxPreference
+			    android:defaultValue="true"
+			    android:dependency="locationNotification"
+			    android:enabled="true"
+			    android:key="locationVibration"
+			    android:selectable="true"
+			    android:summaryOff="Vibration on notification is disabled"
+			    android:summaryOn="Vibration on notification is enabled"
+			    android:title="@string/vibrateEnable" />
         
-        <CheckBoxPreference
-            android:title="@string/vibrateEnable"
-            android:dependency="notificationEnabled"
-            android:enabled="true"
-            android:defaultValue="true"
-            android:key="canVibrate"
-            android:summaryOn="Vibration on notification is enabled"
-            android:summaryOff="Vibration on notification is disabled"
-            android:selectable="true" />
-        
+		</PreferenceScreen>
+          
     </PreferenceCategory>
-            
     
     <PreferenceCategory
         android:key="viewSettings"
         android:title="View Settings" >
+        
         <ListPreference
             android:defaultValue="2"
             android:dialogTitle="@string/sortModeTitle"
@@ -65,9 +85,24 @@
 
     </PreferenceCategory>
     
-    <PreferenceCategory android:key="aboutPref" android:title="About">
-        <Preference android:key="versionDisplay" android:title="Current Application Version" android:summary="@string/version" android:selectable="false" android:enabled="true"/>
-        <Preference android:key="authorDisplay" android:title="App Author" android:summary="@string/appAuthor" android:enabled="true" android:selectable="false"/>
-    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="aboutPref"
+        android:title="About" >
 
+        <Preference
+            android:enabled="true"
+            android:key="versionDisplay"
+            android:selectable="false"
+            android:summary="@string/version"
+            android:title="Current Application Version" />
+        
+        <Preference
+            android:enabled="true"
+            android:key="authorDisplay"
+            android:selectable="false"
+            android:summary="@string/appAuthor"
+            android:title="App Author" />
+
+    </PreferenceCategory>
+    
 </PreferenceScreen>

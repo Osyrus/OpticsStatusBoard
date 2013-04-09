@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="22"
-    android:versionName="@string/version" xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="au.edu.adelaide.physics.opticsstatusboard"
+    android:versionCode="23"
+    android:versionName="@string/version" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -9,6 +10,7 @@
     
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowBackup="true"
