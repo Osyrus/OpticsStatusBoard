@@ -137,6 +137,10 @@ public class BackgroundManager extends IntentService {
 			signInIntent.putExtra("widgetSignIn", true);
 			PendingIntent pendingSignInIntent = PendingIntent.getService(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
 		} else {
 			//And to sign out
 			Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
