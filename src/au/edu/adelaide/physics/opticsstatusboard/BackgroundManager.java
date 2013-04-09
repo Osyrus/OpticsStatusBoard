@@ -5,14 +5,17 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -26,6 +29,7 @@ public class BackgroundManager extends IntentService {
 	private String username, password, sortMode, webAddress;
 	public static final int MAX_RETRIES = 3;
 	private int retries;
+	private final long[] vibratePattern = {0, 200, 0, 200, 0, 200};
 	
 	public BackgroundManager() {
 		super("BackgroundService");
@@ -60,25 +64,26 @@ public class BackgroundManager extends IntentService {
 			
 			//Check if a widget has requested a sign in/out
 			if (data.containsKey("widgetSignIn")) {
-				if (data.getBoolean("widgetSignIn")) {
+				if (data.getBoolean("widgetSignIn"))
 					user.setStatus(0);
-				} else {
+				else
 					user.setStatus(1);
-				}
+				
 				postData();
 			}
 			
 			//Check if this intent was fired by the location proximity alert
 			if (data.containsKey(LocationManager.KEY_PROXIMITY_ENTERING) && locationEnabled) {
-				if (data.getBoolean(LocationManager.KEY_PROXIMITY_ENTERING)) {
+				boolean entered = data.getBoolean(LocationManager.KEY_PROXIMITY_ENTERING);
+				
+				if (entered)
 					user.setStatus(0);
-					System.out.println("Location service requesting sign in");
-					//Notify the user here
-				} else {
+				else
 					user.setStatus(1);
-					System.out.println("Location service requesting sign out");
-					//Also notify here
-				}
+				
+				if (locationNotification)
+					createLocationNotification(entered);
+				
 				postData();
 			}
 		}
@@ -95,6 +100,25 @@ public class BackgroundManager extends IntentService {
 		returnIntent.putExtras(returnData);
 		//Send off the intent
 		LocalBroadcastManager.getInstance(this).sendBroadcast(returnIntent);
+	}
+	
+	private void createLocationNotification(boolean signin) {
+		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(this);
+		nBuilder.setSmallIcon(R.drawable.ic_launcher);
+		
+		if (signin) {
+			nBuilder.setContentTitle("Location Based Signin");
+			nBuilder.setContentText("You are in proximity of the university and have thus been signed in.");
+		} else {
+			nBuilder.setContentTitle("Location Based Signout");
+			nBuilder.setContentText("You are out of proximity of the university and have thus been signed out.");
+		}
+		
+		if (locationVibrate)
+			nBuilder.setVibrate(vibratePattern);
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(0, nBuilder.build());
 	}
 	
 	public void onCreate() {

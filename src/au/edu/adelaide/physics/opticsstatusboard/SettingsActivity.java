@@ -38,13 +38,13 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		if (key.equals("locationEnabled")) {
 			System.out.println("Location enabled setting change detected");
 			boolean enabled = settings.getBoolean("locationEnabled", false);
-			setLocationProximityService(enabled);
+			setLocationProximityService(enabled, this);
 		}
 	}
 	
-	private void setLocationProximityService(boolean enable) {
+	public static void setLocationProximityService(boolean enable, Context context) {
     	//Get the location manager
-    	LocationManager location = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    	LocationManager location = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     	
     	//Set the position and radius for the alert (perhaps read these from preferences later)
     	double lat = -34.91883;
@@ -52,8 +52,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     	float r = 250;
     	
     	//Set up the pending intent to fire off that will start the background manager
-    	Intent locationIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
-		PendingIntent locPendingIntent = PendingIntent.getService(getApplicationContext(), 0, locationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	Intent locationIntent = new Intent(context.getApplicationContext(), BackgroundManager.class);
+		PendingIntent locPendingIntent = PendingIntent.getService(context.getApplicationContext(), 0, locationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     	
     	//Create the proximity alert
 		if (enable)
