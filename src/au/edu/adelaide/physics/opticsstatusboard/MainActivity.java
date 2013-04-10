@@ -46,7 +46,8 @@ public class MainActivity extends Activity {
 	private MenuItem versionButton;
 	private BroadcastReceiver bReceiver;
 
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override
+	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
@@ -123,6 +124,7 @@ public class MainActivity extends Activity {
             
         refreshButton = (ImageButton) findViewById(R.id.refresh_button);
         refreshButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				refreshList();
 			}
@@ -130,6 +132,7 @@ public class MainActivity extends Activity {
         
         setMessageButton = (ImageButton) findViewById(R.id.setMessage);
         setMessageButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(final View v) {
 				showMessageDialog(0);
 			}
@@ -137,6 +140,7 @@ public class MainActivity extends Activity {
         
         setBackMessageButton = (Button) findViewById(R.id.setBackMessage);
         setBackMessageButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				showMessageDialog(1);
 			}
@@ -144,6 +148,7 @@ public class MainActivity extends Activity {
         
         inButton = (ImageButton) findViewById(R.id.in_button);
         inButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(1);
 			}
@@ -151,6 +156,7 @@ public class MainActivity extends Activity {
         
         outButton = (ImageButton) findViewById(R.id.out_button);
         outButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(0);
 			}
@@ -158,6 +164,7 @@ public class MainActivity extends Activity {
         
         confButton = (ImageButton) findViewById(R.id.conf_button);
         confButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(0);
 			}
@@ -165,6 +172,7 @@ public class MainActivity extends Activity {
         
         lunchButton = (ImageButton) findViewById(R.id.lunch_button);
         lunchButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(0);
 			}
@@ -172,6 +180,7 @@ public class MainActivity extends Activity {
         
         sickButton = (ImageButton) findViewById(R.id.sick_button);
         sickButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(0);
 			}
@@ -179,6 +188,7 @@ public class MainActivity extends Activity {
         
         vacButton = (ImageButton) findViewById(R.id.vac_button);
         vacButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				setStatus(0);
 			}
@@ -426,14 +436,16 @@ public class MainActivity extends Activity {
 		findViewById(R.id.progress).setVisibility(View.GONE);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         versionButton = menu.findItem(R.id.versionButton);
         return true;
     }
     
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.action_settings:
     		setNetworking(false);
@@ -496,7 +508,8 @@ public class MainActivity extends Activity {
     	editor.commit();
     }
     
-    protected void onStop() {
+    @Override
+	protected void onStop() {
     	super.onStop();
     	
     	setUserData();
