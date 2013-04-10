@@ -46,6 +46,44 @@ public class MainActivity extends Activity {
 	private MenuItem versionButton;
 	private BroadcastReceiver bReceiver;
 
+    public void disableRefreshButton() {
+		findViewById(R.id.refresh_button).setVisibility(View.GONE);
+		findViewById(R.id.progress).setVisibility(View.VISIBLE);
+    }
+    
+    public void enableRefreshButton() {
+		findViewById(R.id.refresh_button).setVisibility(View.VISIBLE);
+		findViewById(R.id.progress).setVisibility(View.GONE);
+    }
+    public int[] getSignOutTime() {
+    	int[] out = {signOutHour, signOutMinute};
+    	return out;
+    }
+    private Person getUser() {
+    	return user;
+    }
+    
+    public boolean isNetworking() {
+    	return networking;
+    }
+    
+    public void notifyNewVersion(boolean newVersion) {
+    	this.newVersion = newVersion;
+    	
+    	if (newVersion) {
+    		showToast("New version available, download link available in menu");
+    		versionButton.setTitle("Download New Version");
+    	} else {
+    		showToast("Currently up to date :)");
+    	}
+    }
+    
+    public void notifyUserUpdate(Person user) {
+    	this.user = user;
+    	setStatusButton(user.getStatus());
+    	setNewMessageImage(user.hasMessage());
+    }
+    
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -201,6 +239,71 @@ public class MainActivity extends Activity {
     	}
     }
     
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        versionButton = menu.findItem(R.id.versionButton);
+        return true;
+    }
+    
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case R.id.action_settings:
+    		setNetworking(false);
+    		startActivity(new Intent(this, SettingsActivity.class));
+    		return true;
+    	case R.id.versionButton:
+    		if (!newVersion) {
+    			requestUpdateCheck();
+    		} else {
+    			Intent appDownload = new Intent(Intent.ACTION_VIEW);
+    			appDownload.setData(Uri.parse(updateFileURL));
+    			startActivity(appDownload);
+    		}
+    		return true;
+    	case R.id.setStatusOption:
+    		AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);
+        	
+        	statusDialog.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int selectedStatus) {
+					setStatus(selectedStatus);
+					dialog.dismiss();
+				}
+			});
+        	
+        	statusDialog.setTitle(R.string.statusOption);
+        	statusDialog.show();
+        	
+        	return true;
+    	case R.id.setSignOutTime:
+    		refreshUserData();
+    		
+    		TimePickerDialog timePicker = new TimePickerDialog( this, new TimePickerDialog.OnTimeSetListener() {
+    			@Override
+    			public void onTimeSet(TimePicker view, int hour, int min) {
+   					setSignOutTime(hour, min);
+    			}
+    		}, signOutHour, signOutMinute, false);
+    		
+    		timePicker.setTitle(R.string.signOutTime);
+    		timePicker.show();
+    		
+    		return true;
+    	default:
+    		return super.onOptionsItemSelected(item);
+    	}
+    }
+    
+    @Override
+	protected void onStop() {
+    	super.onStop();
+    	
+    	setUserData();
+    }
+    
     public void postUserUpdate() {
     	Intent postIntent = new Intent(this, BackgroundManager.class);
     	Bundle postData = new Bundle();
@@ -210,13 +313,30 @@ public class MainActivity extends Activity {
 		disableRefreshButton();
 		setNetworking(true);
     }
-    public void requestUpdateCheck() {
-    	Intent updateCheckIntent = new Intent(this, BackgroundManager.class);
-    	updateCheckIntent.putExtra("requestVersionCheck", true);
-    	startService(updateCheckIntent);
-    	disableRefreshButton();
-    	setNetworking(true);
+    
+    public void refreshList() {
+    	if (!networking) {
+    		refreshUserData();
+
+    		requestPeopleRefresh();
+
+    		if (user != null && statusChanged) {
+    			setSignOutAlarm();
+    			statusChanged = false;
+    		}
+    	}
     }
+    
+    public void refreshUserData() {
+    	//Get the saved preferences
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        //Retrieve the username and password
+        webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
+        reminderEnabled = settings.getBoolean("reminderEnabled", false);
+        signOutHour = settings.getInt("signOutHour", 18);
+        signOutMinute = settings.getInt("signOutMin", 0);
+    }
+    
     public void requestPeopleRefresh() {
     	Intent refreshIntent = new Intent(this, BackgroundManager.class);
     	startService(refreshIntent);
@@ -224,33 +344,25 @@ public class MainActivity extends Activity {
     	setNetworking(true);
     }
     
-    public void notifyNewVersion(boolean newVersion) {
-    	this.newVersion = newVersion;
-    	
-    	if (newVersion) {
-    		showToast("New version available, download link available in menu");
-    		versionButton.setTitle("Download New Version");
-    	} else {
-    		showToast("Currently up to date :)");
-    	}
+    public void requestUpdateCheck() {
+    	Intent updateCheckIntent = new Intent(this, BackgroundManager.class);
+    	updateCheckIntent.putExtra("requestVersionCheck", true);
+    	startService(updateCheckIntent);
+    	disableRefreshButton();
+    	setNetworking(true);
     }
     
-    public void notifyUserUpdate(Person user) {
-    	this.user = user;
-    	setStatusButton(user.getStatus());
-    	setNewMessageImage(user.hasMessage());
+    public void setNetworking(boolean networking) {
+    	this.networking = networking;
     }
     
-    public void setSignOutTime(int hour, int min) {
-    	signOutHour = hour;
-    	signOutMinute = min;
-    	setUserData();
-    	
-    	if (user != null && reminderEnabled) {
-    		setSignOutAlarm();
-    	}
+    public void setNewMessageImage(boolean newMessage) {
+    	if (newMessage)
+    		findViewById(R.id.newMessageImage).setVisibility(View.VISIBLE);
+    	else
+    		findViewById(R.id.newMessageImage).setVisibility(View.INVISIBLE);
     }
-    
+
     public void setSignOutAlarm() {
     	AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     	
@@ -271,19 +383,14 @@ public class MainActivity extends Activity {
     	alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger, AlarmManager.INTERVAL_DAY, remPendingIntent);
     }
     
-    public int[] getSignOutTime() {
-    	int[] out = {signOutHour, signOutMinute};
-    	return out;
-    }
-    
-    public void refreshUserData() {
-    	//Get the saved preferences
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        //Retrieve the username and password
-        webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
-        reminderEnabled = settings.getBoolean("reminderEnabled", false);
-        signOutHour = settings.getInt("signOutHour", 18);
-        signOutMinute = settings.getInt("signOutMin", 0);
+    public void setSignOutTime(int hour, int min) {
+    	signOutHour = hour;
+    	signOutMinute = min;
+    	setUserData();
+    	
+    	if (user != null && reminderEnabled) {
+    		setSignOutAlarm();
+    	}
     }
     
     public void setStatus(int status) {
@@ -298,19 +405,55 @@ public class MainActivity extends Activity {
     	}
     }
     
-    public void refreshList() {
-    	if (!networking) {
-    		refreshUserData();
+    public void setStatusButton(int status) {
+    	if (statusButtonCurrent != status) {
+    		statusButtonCurrent = status;
+    		
+    		findViewById(R.id.in_button).setVisibility(View.GONE);
+    		findViewById(R.id.out_button).setVisibility(View.GONE);
+    		findViewById(R.id.conf_button).setVisibility(View.GONE);
+    		findViewById(R.id.lunch_button).setVisibility(View.GONE);
+    		findViewById(R.id.sick_button).setVisibility(View.GONE);
+    		findViewById(R.id.vac_button).setVisibility(View.GONE);
 
-    		requestPeopleRefresh();
-
-    		if (user != null && statusChanged) {
-    			setSignOutAlarm();
-    			statusChanged = false;
+    		switch (status) {
+    		case 0:
+    			findViewById(R.id.in_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 1:
+    			findViewById(R.id.out_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 2:
+    			findViewById(R.id.conf_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 3:
+    			findViewById(R.id.lunch_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 4:
+    			findViewById(R.id.sick_button).setVisibility(View.VISIBLE);
+    			break;
+    		case 5:
+    			findViewById(R.id.vac_button).setVisibility(View.VISIBLE);
+    			break;
+    		default:
+    			// TODO What should it do in this case?
     		}
     	}
     }
     
+    public void setUserData() {
+    	//Get the preferences
+    	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+    	SharedPreferences.Editor editor = settings.edit();
+    	
+    	//Save any changed data
+    	editor.putString("webAddress", webAddress);
+    	editor.putInt("signOutHour", signOutHour);
+    	editor.putInt("signOutMin", signOutMinute);
+    	
+    	//Commit the changes
+    	editor.commit();
+    }
     public void showMessageDialog(final int messageType) {
     	if (!networking && user != null) {
     		refreshUserData();
@@ -378,151 +521,8 @@ public class MainActivity extends Activity {
 			showToast("Invalid Username");
     	}
     }
-    
     public void showToast(String data) {
     	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
-    }
-    
-    public void setStatusButton(int status) {
-    	if (statusButtonCurrent != status) {
-    		statusButtonCurrent = status;
-    		
-    		findViewById(R.id.in_button).setVisibility(View.GONE);
-    		findViewById(R.id.out_button).setVisibility(View.GONE);
-    		findViewById(R.id.conf_button).setVisibility(View.GONE);
-    		findViewById(R.id.lunch_button).setVisibility(View.GONE);
-    		findViewById(R.id.sick_button).setVisibility(View.GONE);
-    		findViewById(R.id.vac_button).setVisibility(View.GONE);
-
-    		switch (status) {
-    		case 0:
-    			findViewById(R.id.in_button).setVisibility(View.VISIBLE);
-    			break;
-    		case 1:
-    			findViewById(R.id.out_button).setVisibility(View.VISIBLE);
-    			break;
-    		case 2:
-    			findViewById(R.id.conf_button).setVisibility(View.VISIBLE);
-    			break;
-    		case 3:
-    			findViewById(R.id.lunch_button).setVisibility(View.VISIBLE);
-    			break;
-    		case 4:
-    			findViewById(R.id.sick_button).setVisibility(View.VISIBLE);
-    			break;
-    		case 5:
-    			findViewById(R.id.vac_button).setVisibility(View.VISIBLE);
-    			break;
-    		default:
-    			// TODO What should it do in this case?
-    		}
-    	}
-    }
-    
-    public void setNewMessageImage(boolean newMessage) {
-    	if (newMessage)
-    		findViewById(R.id.newMessageImage).setVisibility(View.VISIBLE);
-    	else
-    		findViewById(R.id.newMessageImage).setVisibility(View.INVISIBLE);
-    }
-    
-    public void disableRefreshButton() {
-		findViewById(R.id.refresh_button).setVisibility(View.GONE);
-		findViewById(R.id.progress).setVisibility(View.VISIBLE);
-    }
-    
-    public void enableRefreshButton() {
-		findViewById(R.id.refresh_button).setVisibility(View.VISIBLE);
-		findViewById(R.id.progress).setVisibility(View.GONE);
-    }
-
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        versionButton = menu.findItem(R.id.versionButton);
-        return true;
-    }
-    
-    @Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {
-    	case R.id.action_settings:
-    		setNetworking(false);
-    		startActivity(new Intent(this, SettingsActivity.class));
-    		return true;
-    	case R.id.versionButton:
-    		if (!newVersion) {
-    			requestUpdateCheck();
-    		} else {
-    			Intent appDownload = new Intent(Intent.ACTION_VIEW);
-    			appDownload.setData(Uri.parse(updateFileURL));
-    			startActivity(appDownload);
-    		}
-    		return true;
-    	case R.id.setStatusOption:
-    		AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);
-        	
-        	statusDialog.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int selectedStatus) {
-					setStatus(selectedStatus);
-					dialog.dismiss();
-				}
-			});
-        	
-        	statusDialog.setTitle(R.string.statusOption);
-        	statusDialog.show();
-        	
-        	return true;
-    	case R.id.setSignOutTime:
-    		refreshUserData();
-    		
-    		TimePickerDialog timePicker = new TimePickerDialog( this, new TimePickerDialog.OnTimeSetListener() {
-    			@Override
-    			public void onTimeSet(TimePicker view, int hour, int min) {
-   					setSignOutTime(hour, min);
-    			}
-    		}, signOutHour, signOutMinute, false);
-    		
-    		timePicker.setTitle(R.string.signOutTime);
-    		timePicker.show();
-    		
-    		return true;
-    	default:
-    		return super.onOptionsItemSelected(item);
-    	}
-    }
-    
-    public void setUserData() {
-    	//Get the preferences
-    	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-    	SharedPreferences.Editor editor = settings.edit();
-    	
-    	//Save any changed data
-    	editor.putString("webAddress", webAddress);
-    	editor.putInt("signOutHour", signOutHour);
-    	editor.putInt("signOutMin", signOutMinute);
-    	
-    	//Commit the changes
-    	editor.commit();
-    }
-    
-    @Override
-	protected void onStop() {
-    	super.onStop();
-    	
-    	setUserData();
-    }
-    
-    public void setNetworking(boolean networking) {
-    	this.networking = networking;
-    }
-    public boolean isNetworking() {
-    	return networking;
-    }
-    private Person getUser() {
-    	return user;
     }
 }
 
