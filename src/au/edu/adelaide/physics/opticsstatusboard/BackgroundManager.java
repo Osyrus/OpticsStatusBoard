@@ -35,6 +35,108 @@ public class BackgroundManager extends IntentService {
 		super("BackgroundService");
 	}
 		
+	public boolean canShowNameInList() {
+    	return showNameInList;
+    }
+	
+	private void checkForUpdate() {
+    	new UpdateChecker(this).check(updateWebsite);
+    }
+	
+	private void createNotification(int type, boolean param) {
+		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(this);
+		nBuilder.setSmallIcon(R.drawable.ic_launcher);
+		
+		switch (type) {
+		case 0:
+			if (param) {
+				nBuilder.setContentTitle("Location Based Signin");
+				nBuilder.setContentText("You are in proximity of the university and have thus been signed in.");
+			} else {
+				nBuilder.setContentTitle("Location Based Signout");
+				nBuilder.setContentText("You are out of proximity of the university and have thus been signed out.");
+			}
+			
+			if (locationVibrate)
+				nBuilder.setVibrate(vibratePattern);
+			
+			break;
+		case 1:
+			if (param) {
+				nBuilder.setContentTitle("Signin Reminder");
+				nBuilder.setContentText("This is a reminder to sign in");
+			} else {
+				nBuilder.setContentTitle("Signout Reminder");
+				nBuilder.setContentText("This is a reminder to sign out");
+			}
+			
+			if (reminderVibrate)
+				nBuilder.setVibrate(vibratePattern);
+			
+			break;
+		default:
+			break;
+		}
+		
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(0, nBuilder.build());
+	}
+	
+    public void decRetries() {
+    	retries -= 1;
+    }
+    
+    public String getPassword() {
+    	return password;
+    }
+    
+    public ArrayList<Person> getPeople() {
+    	return people;
+    }
+    
+    public int getRetries() {
+    	return retries;
+    }
+    
+    public Person getUser() {
+    	return user;
+    }
+    
+    public String getUsername() {
+    	return username;
+    }
+    
+    public void notifyNewVersion(boolean newVersion) {
+    	this.newVersion = newVersion;
+    }
+    
+    @Override
+	public void onCreate() {
+		super.onCreate();
+		
+		website = null;
+        retries = 0;
+        user = null;
+        newVersion = false;
+        
+        people = new ArrayList<Person>(0);
+        
+        refreshUserData();
+		
+		try {
+			website = new URL(webAddress);
+			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void onDestroy () {
+		super.onDestroy();
+	}
+	
 	@Override
 	protected void onHandleIntent (Intent intent) {
 		Bundle data = intent.getExtras();
@@ -111,67 +213,14 @@ public class BackgroundManager extends IntentService {
 		//Send off the intent
 		LocalBroadcastManager.getInstance(this).sendBroadcast(returnIntent);
 	}
-	
-	private void createNotification(int type, boolean param) {
-		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(this);
-		nBuilder.setSmallIcon(R.drawable.ic_launcher);
-		
-		switch (type) {
-		case 0:
-			if (param) {
-				nBuilder.setContentTitle("Location Based Signin");
-				nBuilder.setContentText("You are in proximity of the university and have thus been signed in.");
-			} else {
-				nBuilder.setContentTitle("Location Based Signout");
-				nBuilder.setContentText("You are out of proximity of the university and have thus been signed out.");
-			}
-			
-			if (locationVibrate)
-				nBuilder.setVibrate(vibratePattern);
-			
-			break;
-		case 1:
-			if (param) {
-				nBuilder.setContentTitle("Signin Reminder");
-				nBuilder.setContentText("This is a reminder to sign in");
-			} else {
-				nBuilder.setContentTitle("Signout Reminder");
-				nBuilder.setContentText("This is a reminder to sign out");
-			}
-			
-			if (reminderVibrate)
-				nBuilder.setVibrate(vibratePattern);
-			
-			break;
-		default:
-			break;
-		}
-		
-
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(0, nBuilder.build());
-	}
-	
-	public void onCreate() {
-		super.onCreate();
-		
-		website = null;
-        retries = 0;
-        user = null;
-        newVersion = false;
-        
-        people = new ArrayList<Person>(0);
-        
-        refreshUserData();
-		
-		try {
-			website = new URL(webAddress);
-			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-	}
-	
+    public String postData() {
+    	refreshUserData();
+    	
+    	Poster poster = new Poster(website, this);
+    	String result = poster.postToWebsite();
+    	
+    	return result;
+    }
     public void refreshList() {
     	refreshUserData();
     	
@@ -180,36 +229,24 @@ public class BackgroundManager extends IntentService {
     	user = parser.fetchUser();
 ;    	people = parser.fetchPeople();
     }
-    
-    private void updateWidget() {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-		ComponentName myWidget = new ComponentName(this.getApplicationContext(), ToggleWidget.class);
-		RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.toggle_widget);
-
-		// Register an onClickListener to sign in
-		if (user.getStatus() > 0) { 
-			Intent signInIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
-			signInIntent.putExtra("widgetSignIn", true);
-			PendingIntent pendingSignInIntent = PendingIntent.getService(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
-		} else {
-			//And to sign out
-			Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
-			signOutIntent.putExtra("widgetSignIn", false);
-			PendingIntent pendingSignOutIntent = PendingIntent.getService(getApplicationContext(), 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
-		}
-
-		setWidgetImage(user.getStatus(), remoteViews);
-		setWidgetCounter(remoteViews);
-		
-		appWidgetManager.updateAppWidget(myWidget, remoteViews);
+    private void refreshUserData() {
+    	//Get the saved preferences
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        //Retrieve the required settings
+        username = settings.getString("username", "").trim();
+        password = settings.getString("password", "").trim();
+        sortMode = settings.getString("sortMode", "2");
+        webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
+        showNameInList = settings.getBoolean("showName", false);
+        locationEnabled = settings.getBoolean("locationEnabled", false);
+        locationNotification = settings.getBoolean("locationNotification", false);
+        locationVibrate = settings.getBoolean("locationVibrate", false);
+        reminderEnabled = settings.getBoolean("reminderEnabled", false);
+        reminderVibrate = settings.getBoolean("reminderVibrate", false);
     }
-    
+    public void setRetries(int retries) {
+    	this.retries = retries;
+    }
     private void setWidgetCounter(RemoteViews views) {
     	Person current;
     	int counter = 0;
@@ -222,7 +259,6 @@ public class BackgroundManager extends IntentService {
     	
     	views.setTextViewText(R.id.inCounterW, "In: "+Integer.toString(counter));
     }
-    
     private void setWidgetImage(int status, RemoteViews views) {
     	views.setViewVisibility(R.id.inButtonW, View.GONE);
     	views.setViewVisibility(R.id.outButtonW, View.GONE);
@@ -254,69 +290,35 @@ public class BackgroundManager extends IntentService {
     		// TODO What should it do in this case?
     	}
     }
-    
-    private void checkForUpdate() {
-    	new UpdateChecker(this).check(updateWebsite);
-    }
-    
-    public String postData() {
-    	refreshUserData();
-    	
-    	Poster poster = new Poster(website, this);
-    	String result = poster.postToWebsite();
-    	
-    	return result;
-    }
-    
-    private void refreshUserData() {
-    	//Get the saved preferences
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        //Retrieve the required settings
-        username = settings.getString("username", "").trim();
-        password = settings.getString("password", "").trim();
-        sortMode = settings.getString("sortMode", "2");
-        webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
-        showNameInList = settings.getBoolean("showName", false);
-        locationEnabled = settings.getBoolean("locationEnabled", false);
-        locationNotification = settings.getBoolean("locationNotification", false);
-        locationVibrate = settings.getBoolean("locationVibrate", false);
-        reminderEnabled = settings.getBoolean("reminderEnabled", false);
-        reminderVibrate = settings.getBoolean("reminderVibrate", false);
-    }
-    
-    public void notifyNewVersion(boolean newVersion) {
-    	this.newVersion = newVersion;
-    }
-	
-	public void onDestroy () {
-		super.onDestroy();
-	}
-	
-	public void showToast(String data) {
+    public void showToast(String data) {
     	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
     }
-    public int getRetries() {
-    	return retries;
-    }
-    public void decRetries() {
-    	retries -= 1;
-    }
-    public void setRetries(int retries) {
-    	this.retries = retries;
-    }
-    public boolean canShowNameInList() {
-    	return showNameInList;
-    }
-    public String getUsername() {
-    	return username;
-    }
-    public String getPassword() {
-    	return password;
-    }
-    public Person getUser() {
-    	return user;
-    }
-    public ArrayList<Person> getPeople() {
-    	return people;
+    private void updateWidget() {
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
+		ComponentName myWidget = new ComponentName(this.getApplicationContext(), ToggleWidget.class);
+		RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.toggle_widget);
+
+		// Register an onClickListener to sign in
+		if (user.getStatus() > 0) { 
+			Intent signInIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			signInIntent.putExtra("widgetSignIn", true);
+			PendingIntent pendingSignInIntent = PendingIntent.getService(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
+			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
+		} else {
+			//And to sign out
+			Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			signOutIntent.putExtra("widgetSignIn", false);
+			PendingIntent pendingSignOutIntent = PendingIntent.getService(getApplicationContext(), 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
+		}
+
+		setWidgetImage(user.getStatus(), remoteViews);
+		setWidgetCounter(remoteViews);
+		
+		appWidgetManager.updateAppWidget(myWidget, remoteViews);
     }
 }
