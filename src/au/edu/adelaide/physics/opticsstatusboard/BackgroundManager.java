@@ -192,7 +192,10 @@ public class BackgroundManager extends IntentService {
 			//Check to see if fired by the alarm, and then send the required notification
 			if (data.containsKey("reminderAlarm") && reminderEnabled) {
 				if (reminderEnabled) {
-					if (!data.getBoolean("reminderAlarm")) {
+					if (data.getBoolean("reminderAlarm")) {
+						System.out.println("Reminder alarm to sign in went off");
+					} else {
+						System.out.println("Reminder alarm to sign out went off");
 						if (user.getStatus() == 0)
 							createNotification(1, false);
 					}
@@ -231,7 +234,7 @@ public class BackgroundManager extends IntentService {
     }
     private void refreshUserData() {
     	//Get the saved preferences
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         //Retrieve the required settings
         username = settings.getString("username", "").trim();
         password = settings.getString("password", "").trim();
@@ -294,15 +297,16 @@ public class BackgroundManager extends IntentService {
     	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
     }
     private void updateWidget() {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-		ComponentName myWidget = new ComponentName(this.getApplicationContext(), ToggleWidget.class);
-		RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.toggle_widget);
+    	Context context = getApplicationContext();
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+		ComponentName myWidget = new ComponentName(context, ToggleWidget.class);
+		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.toggle_widget);
 
 		// Register an onClickListener to sign in
 		if (user.getStatus() > 0) { 
-			Intent signInIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			Intent signInIntent = new Intent(context, BackgroundManager.class);
 			signInIntent.putExtra("widgetSignIn", true);
-			PendingIntent pendingSignInIntent = PendingIntent.getService(getApplicationContext(), 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingSignInIntent = PendingIntent.getService(context, 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
 			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
 			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
@@ -310,9 +314,9 @@ public class BackgroundManager extends IntentService {
 			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
 		} else {
 			//And to sign out
-			Intent signOutIntent = new Intent(this.getApplicationContext(), BackgroundManager.class);
+			Intent signOutIntent = new Intent(context, BackgroundManager.class);
 			signOutIntent.putExtra("widgetSignIn", false);
-			PendingIntent pendingSignOutIntent = PendingIntent.getService(getApplicationContext(), 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingSignOutIntent = PendingIntent.getService(context, 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
 		}
 
