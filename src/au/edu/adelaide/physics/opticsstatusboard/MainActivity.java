@@ -228,6 +228,7 @@ public class MainActivity extends Activity {
     public void notifyUserUpdate(Person user) {
     	this.user = user;
     	setStatusButton(user.getStatus());
+    	setNewMessageImage(user.hasMessage());
     }
     
     public void setSignOutTime(int hour, int min) {
@@ -406,6 +407,13 @@ public class MainActivity extends Activity {
     			// TODO What should it do in this case?
     		}
     	}
+    }
+    
+    public void setNewMessageImage(boolean newMessage) {
+    	if (newMessage)
+    		findViewById(R.id.newMessageImage).setVisibility(View.VISIBLE);
+    	else
+    		findViewById(R.id.newMessageImage).setVisibility(View.INVISIBLE);
     }
     
     public void disableRefreshButton() {

@@ -151,6 +151,16 @@
             android:layout_toRightOf="@+id/setMessage"
             android:text="@string/setBackMessage" />
 
+        <ImageView
+            android:id="@+id/newMessageImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/refresh_button"
+            android:contentDescription="@string/newMessage"
+            android:src="@drawable/new_message"
+            android:visibility="invisible" />
+
     </RelativeLayout>
         
     <ListView

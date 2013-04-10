@@ -28,5 +28,6 @@
     <string name="vibrateEnable">Enable Vibration Alert</string>
     <string name="locationEnable">Location based sign in/out</string>
     <string name="inCounter">Counter</string>
+    <string name="newMessage">New Message</string>
 
 </resources>
