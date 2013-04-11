@@ -123,7 +123,7 @@
         android:title="Widget Preferences" >
         
         <ListPreference
-            android:defaultValue="3"
+            android:defaultValue="7200000"
             android:dialogTitle="@string/widgetUpdateInterval"
             android:enabled="true"
             android:entries="@array/widgetUpdateIntervalNames"
