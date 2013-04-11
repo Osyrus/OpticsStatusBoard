@@ -26,7 +26,7 @@ public class BackgroundManager extends IntentService {
 	private URL website, updateWebsite;
 	private boolean showNameInList, newVersion, locationEnabled, locationNotification, locationVibrate, reminderEnabled, reminderVibrate;
 	private Person user;
-	private String username, password, sortMode, webAddress;
+	private String username, password, sortMode, webAddress, updateAddress;
 	public static final int MAX_RETRIES = 3;
 	private int retries;
 	private final long[] vibratePattern = {0, 200, 0, 200, 0, 200};
@@ -126,7 +126,7 @@ public class BackgroundManager extends IntentService {
 		
 		try {
 			website = new URL(webAddress);
-			updateWebsite = new URL("https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
+			updateWebsite = new URL(updateAddress);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -241,6 +241,7 @@ public class BackgroundManager extends IntentService {
         sortMode = settings.getString("sortMode", "2");
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
         showNameInList = settings.getBoolean("showName", false);
+        updateAddress = settings.getString("updateAddress", "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");
         locationEnabled = settings.getBoolean("locationEnabled", false);
         locationNotification = settings.getBoolean("locationNotification", false);
         locationVibrate = settings.getBoolean("locationVibrate", false);

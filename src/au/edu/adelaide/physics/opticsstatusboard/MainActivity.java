@@ -95,8 +95,6 @@ public class MainActivity extends Activity {
         statusChanged = true;
         newVersion = false;
         statusButtonCurrent = 0;
-        
-        updateFileURL = "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk";
            
         peopleList = (ListView) findViewById(R.id.peopleList);
         
@@ -335,6 +333,7 @@ public class MainActivity extends Activity {
         reminderEnabled = settings.getBoolean("reminderEnabled", false);
         signOutHour = settings.getInt("signOutHour", 18);
         signOutMinute = settings.getInt("signOutMin", 0);
+        updateFileURL = settings.getString("updateFileURL" ,"https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/OpticsStatusBoard.apk");
     }
     
     public void requestPeopleRefresh() {
