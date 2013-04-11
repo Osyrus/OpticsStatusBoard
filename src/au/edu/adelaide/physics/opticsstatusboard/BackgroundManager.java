@@ -201,6 +201,10 @@ public class BackgroundManager extends IntentService {
 					}
 				}
 			}
+			
+			if (data.containsKey("widgetAlarmCall")) {
+				System.out.println("Widget alarm called the background service");
+			}
 		}
 		
 		//Refresh the widget

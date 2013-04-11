@@ -119,6 +119,23 @@
     </PreferenceCategory>
     
     <PreferenceCategory
+        android:key="widgetPrefs"
+        android:title="Widget Preferences" >
+        
+        <ListPreference
+            android:defaultValue="3"
+            android:dialogTitle="@string/widgetUpdateInterval"
+            android:enabled="true"
+            android:entries="@array/widgetUpdateIntervalNames"
+            android:entryValues="@array/widgetUpdateIntervalValues"
+            android:key="widgetUpdateInterval"
+            android:selectable="true"
+            android:summary="Set the time between widget updates"
+            android:title="@string/widgetUpdateInterval" />
+
+    </PreferenceCategory>
+    
+    <PreferenceCategory
         android:key="aboutPref"
         android:title="About" >
 
@@ -137,5 +154,6 @@
             android:title="App Author" />
 
     </PreferenceCategory>
+    
     
 </PreferenceScreen>
