@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="26"
+    android:versionCode="28"
     android:versionName="@string/version" >
 
     <uses-sdk
@@ -30,7 +30,10 @@
             </intent-filter>
         </activity>
         
-        <activity android:label="Settings" android:theme="@style/AppBaseTheme" android:name="SettingsActivity">
+        <activity
+            android:label="Settings"
+            android:theme="@style/AppBaseTheme"
+            android:name="au.edu.adelaide.physics.opticsstatusboard.SettingsActivity">
             <intent-filter android:label="settingsPage">
                 <action android:name="android.intent.action.SETTINGS" />
                 <category android:name="android.intent.category.LAUNCHER" />

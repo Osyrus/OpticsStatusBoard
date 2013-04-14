@@ -36,16 +36,14 @@
             android:key="locationSettings"
             android:title="Location Service" android:summary="Location based sign in/out service">
 			
-			<SwitchPreference
+			<CheckBoxPreference
 			    android:defaultValue="false"
 			    android:enabled="true"
 			    android:key="locationEnabled"
 			    android:selectable="true"
 			    android:summaryOff="Turn service on to automatically sign in and out when in range of the university"
 			    android:summaryOn="Service will automatically sign you in when in range of the university"
-			    android:switchTextOff="Off"
-			    android:switchTextOn="On"
-			    android:title="@string/locationEnable" />
+			    android:title="@string/locationEnable" android:disableDependentsState="false"/>
 
 			<CheckBoxPreference
 			    android:defaultValue="false"
@@ -75,7 +73,7 @@
             android:summary="Sign in/out reminder service"
             android:title="Reminder Alarm" >
 			
-            <SwitchPreference
+            <CheckBoxPreference
                 android:defaultValue="false"
                 android:disableDependentsState="false"
                 android:enabled="true"
@@ -83,8 +81,6 @@
                 android:selectable="true"
                 android:summaryOff="Turn on to enable a reminder to sign in or out."
                 android:summaryOn="A reminder to sign in out out is enabled."
-                android:switchTextOff="Off"
-                android:switchTextOn="On"
                 android:title="Reminder Alarm Service" />
             
             <CheckBoxPreference

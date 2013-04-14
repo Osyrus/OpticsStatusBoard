@@ -74,6 +74,15 @@ public class BackgroundManager extends IntentService {
 				nBuilder.setVibrate(vibratePattern);
 			
 			break;
+		case 2:
+			nBuilder.setContentTitle("Debug notification");
+			
+			if (param)
+				nBuilder.setContentText("The widget has updated when user was signed in");
+			else
+				nBuilder.setContentText("The widget has updated when user was signed out");
+			
+			nBuilder.setVibrate(vibratePattern);
 		default:
 			break;
 		}
@@ -166,10 +175,13 @@ public class BackgroundManager extends IntentService {
 			
 			//Check if a widget has requested a sign in/out
 			if (data.containsKey("widgetSignIn")) {
-				if (data.getBoolean("widgetSignIn"))
+				if (data.getBoolean("widgetSignIn")) {
 					user.setStatus(0);
-				else
+					showToast("Widget sign in request sent");
+				} else {
 					user.setStatus(1);
+					showToast("Widget sign out request sent");
+				}
 				
 				postData();
 			}
@@ -178,10 +190,11 @@ public class BackgroundManager extends IntentService {
 			if (data.containsKey(LocationManager.KEY_PROXIMITY_ENTERING) && locationEnabled) {
 				boolean entered = data.getBoolean(LocationManager.KEY_PROXIMITY_ENTERING);
 				
-				if (entered)
+				if (entered) {
 					user.setStatus(0);
-				else
+				} else {
 					user.setStatus(1);
+				}
 				
 				if (locationNotification)
 					createNotification(0, entered);
@@ -203,7 +216,12 @@ public class BackgroundManager extends IntentService {
 			}
 			
 			if (data.containsKey("widgetAlarmCall")) {
-				System.out.println("Widget alarm called the background service");
+				boolean signedin = false;
+				
+				if (user.getStatus() == 0)
+					signedin = true;
+				
+				createNotification(2, signedin);
 			}
 		}
 		
@@ -302,32 +320,34 @@ public class BackgroundManager extends IntentService {
     	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
     }
     private void updateWidget() {
-    	Context context = getApplicationContext();
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-		ComponentName myWidget = new ComponentName(context, ToggleWidget.class);
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.toggle_widget);
+    	if (user != null) {
+    		Context context = getApplicationContext();
+    		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+    		ComponentName myWidget = new ComponentName(context, ToggleWidget.class);
+    		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.toggle_widget);
 
-		// Register an onClickListener to sign in
-		if (user.getStatus() > 0) { 
-			Intent signInIntent = new Intent(context, BackgroundManager.class);
-			signInIntent.putExtra("widgetSignIn", true);
-			PendingIntent pendingSignInIntent = PendingIntent.getService(context, 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
-			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
-		} else {
-			//And to sign out
-			Intent signOutIntent = new Intent(context, BackgroundManager.class);
-			signOutIntent.putExtra("widgetSignIn", false);
-			PendingIntent pendingSignOutIntent = PendingIntent.getService(context, 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
-		}
+    		// Register an onClickListener to sign in
+    		if (user.getStatus() > 0) {
+    			Intent signInIntent = new Intent(context, BackgroundManager.class);
+    			signInIntent.putExtra("widgetSignIn", true);
+    			PendingIntent pendingSignInIntent = PendingIntent.getService(context, 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
+    		} else {
+    			//And to sign out
+    			Intent signOutIntent = new Intent(context, BackgroundManager.class);
+    			signOutIntent.putExtra("widgetSignIn", false);
+    			PendingIntent pendingSignOutIntent = PendingIntent.getService(context, 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
+    		}
 
-		setWidgetImage(user.getStatus(), remoteViews);
-		setWidgetCounter(remoteViews);
-		
-		appWidgetManager.updateAppWidget(myWidget, remoteViews);
+    		setWidgetImage(user.getStatus(), remoteViews);
+    		setWidgetCounter(remoteViews);
+
+    		appWidgetManager.updateAppWidget(myWidget, remoteViews);
+    	}
     }
 }
