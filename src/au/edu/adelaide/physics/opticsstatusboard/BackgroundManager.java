@@ -78,9 +78,9 @@ public class BackgroundManager extends IntentService {
 			nBuilder.setContentTitle("Debug notification");
 			
 			if (param)
-				nBuilder.setContentText("The widget has updated when user was signed in");
+				nBuilder.setContentText("Status changed during widget update!!");
 			else
-				nBuilder.setContentText("The widget has updated when user was signed out");
+				nBuilder.setContentText("Widget updated without status change.");
 			
 			nBuilder.setVibrate(vibratePattern);
 		default:
@@ -149,6 +149,11 @@ public class BackgroundManager extends IntentService {
 	@Override
 	protected void onHandleIntent (Intent intent) {
 		Bundle data = intent.getExtras();
+		boolean preSignedIn = false;
+		
+		if (user != null)
+			if (user.getStatus() == 0)
+				preSignedIn = true;
 		
 		//Update the list of people and get the user
 		refreshList();
@@ -216,12 +221,14 @@ public class BackgroundManager extends IntentService {
 			}
 			
 			if (data.containsKey("widgetAlarmCall")) {
-				boolean signedin = false;
+				boolean statusChange = false;
 				
-				if (user.getStatus() == 0)
-					signedin = true;
+				if (user.getStatus() == 0 && !preSignedIn)
+					statusChange = true;
+				if (user.getStatus() > 0 && preSignedIn)
+					statusChange = true;
 				
-				createNotification(2, signedin);
+				createNotification(2, statusChange);
 			}
 		}
 		
