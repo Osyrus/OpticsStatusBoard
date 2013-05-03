@@ -170,6 +170,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/topBar"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:animateLayoutChanges="false"
         android:layoutAnimation="@anim/list_view_animation" />
 

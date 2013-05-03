@@ -4,18 +4,6 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
 
-    <ImageView
-        android:id="@+id/personStatus"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
-        android:background="@null"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/personStatus"
-        android:src="@drawable/out" />
-
     <TextView
         android:id="@+id/personName"
         android:layout_width="wrap_content"
@@ -23,7 +11,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_margin="2dp"
-        android:layout_toRightOf="@+id/personStatus"
+        android:layout_alignParentLeft="true"
         android:gravity="center_vertical"
         android:text="Persons Name"
         android:textSize="20sp" />
@@ -34,7 +22,7 @@
         android:layout_height="20dp"
         android:gravity="center_vertical"
         android:layout_alignLeft="@+id/personName"
-        android:layout_alignRight="@+id/personName"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/personName"
         android:scrollHorizontally="true"
         android:singleLine="true"

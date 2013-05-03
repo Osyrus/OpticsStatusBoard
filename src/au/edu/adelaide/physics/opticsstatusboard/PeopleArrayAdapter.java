@@ -7,7 +7,7 @@ import android.widget.ArrayAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class PeopleArrayAdapter extends ArrayAdapter<Person> {
@@ -26,46 +26,21 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 		
 		TextView nameTextView = (TextView) personRow.findViewById(R.id.personName);
 		TextView messageTextView = (TextView) personRow.findViewById(R.id.personMessage);
-		ImageView imageView = (ImageView) personRow.findViewById(R.id.personStatus);
+		RelativeLayout layout = (RelativeLayout) personRow.findViewById(R.id.personRow);
 		
-		int resId = 0;
+		int box = 0;
 		
 		if (!activity.isNetworking()) {
 			Person current = people.get(position);
 
-			switch (current.getStatus()) {
-			case 0:
-				resId = R.drawable.in;
-//				imageView.setImageResource(R.drawable.in);
-				break;
-			case 1:
-				resId = R.drawable.out;
-//				imageView.setImageResource(R.drawable.out);
-				break;
-			case 2:
-				resId = R.drawable.meeting;
-//				imageView.setImageResource(R.drawable.meeting);
-				break;
-			case 3:
-				resId = R.drawable.lunch;
-//				imageView.setImageResource(R.drawable.lunch);
-				break;
-			case 4:
-				resId = R.drawable.sick;
-//				imageView.setImageResource(R.drawable.sick);
-				break;
-			case 5:
-				resId = R.drawable.vacation;
-//				imageView.setImageResource(R.drawable.vacation);
-				break;
-			default:
-				resId = R.drawable.out;
-//				imageView.setImageResource(R.drawable.out);
-				break;
+			if (current.getStatus() == 0) {
+				box = R.drawable.row_status_in;
+			} else {
+				box = R.drawable.row_status_out;
 			}
 			
-			loadBitmap(resId, imageView);
-
+			layout.setBackgroundResource(box);
+			
 			nameTextView.setText(current.getName());
 			messageTextView.setText(current.getMessage());
 		}
@@ -73,12 +48,12 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 		return personRow;
 	}
 	
-	private void loadBitmap(int resId, ImageView imageView) {
-	    if (BitmapWorkerTask.cancelPotentialWork(resId, imageView)) {
-	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, activity);
-	        final AsyncDrawable asyncDrawable = new AsyncDrawable(activity.getResources(), null, task);
-	        imageView.setImageDrawable(asyncDrawable);
-	        task.execute(resId);
-	    }
-	}
+//	private void loadBitmap(int resId, ImageView imageView) {
+//	    if (BitmapWorkerTask.cancelPotentialWork(resId, imageView)) {
+//	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, activity);
+//	        final AsyncDrawable asyncDrawable = new AsyncDrawable(activity.getResources(), null, task);
+//	        imageView.setImageDrawable(asyncDrawable);
+//	        task.execute(resId);
+//	    }
+//	}
 }
