@@ -262,18 +262,22 @@ public class MainActivity extends Activity {
     		}
     		return true;
     	case R.id.setStatusOption:
-    		AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);
+    		if (user != null) {
+    			AlertDialog.Builder statusDialog = new AlertDialog.Builder(this);
         	
-        	statusDialog.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int selectedStatus) {
-					setStatus(selectedStatus);
-					dialog.dismiss();
-				}
-			});
-        	
-        	statusDialog.setTitle(R.string.statusOption);
-        	statusDialog.show();
+    			statusDialog.setSingleChoiceItems(R.array.statusOptions, user.getStatus(), new DialogInterface.OnClickListener() {
+    				@Override
+    				public void onClick(DialogInterface dialog, int selectedStatus) {
+    					setStatus(selectedStatus);
+    					dialog.dismiss();
+    				}
+    			});
+    			
+    			statusDialog.setTitle(R.string.statusOption);
+    			statusDialog.show();
+    		} else {
+    			showToast("Not logged in correctly or list hasn't loaded yet");
+    		}
         	
         	return true;
     	case R.id.setSignOutTime:
