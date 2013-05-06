@@ -267,7 +267,7 @@ public class BackgroundManager extends IntentService {
         //Retrieve the required settings
         username = settings.getString("username", "").trim();
         password = settings.getString("password", "").trim();
-        sortMode = settings.getString("sortMode", "2");
+        sortMode = settings.getString("sortMode", "3");
         webAddress = settings.getString("webAddress", "http://www.physics.adelaide.edu.au/cgi-bin/usignin/usignin.cgi");
         showNameInList = settings.getBoolean("showName", false);
         updateAddress = settings.getString("updateAddress", "https://dl.dropbox.com/u/11481054/OpticsStatusBoardApp/current_version.html");

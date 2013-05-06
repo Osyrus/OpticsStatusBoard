@@ -102,7 +102,7 @@
         android:title="View Settings" >
         
         <ListPreference
-            android:defaultValue="2"
+            android:defaultValue="3"
             android:dialogTitle="@string/sortModeTitle"
             android:enabled="true"
             android:entries="@array/sortModeTypes"

@@ -8,10 +8,10 @@
         android:id="@+id/personName"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
-        android:layout_alignParentLeft="true"
+        android:layout_margin="3dp"
         android:gravity="center_vertical"
         android:text="Persons Name"
         android:textSize="20sp" />
@@ -20,14 +20,15 @@
         android:id="@+id/personMessage"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:gravity="center_vertical"
         android:layout_alignLeft="@+id/personName"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/personName"
+        android:layout_margin="3dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:ellipsize="end"
-        android:textSize="14sp"
-        android:text="Persons Message" />
+        android:text="Persons Message"
+        android:textSize="14sp" />
 
 </RelativeLayout>
