@@ -71,7 +71,7 @@
 		<PreferenceScreen
             android:key="reminderAlarm"
             android:summary="Sign in/out reminder service"
-            android:title="Reminder Alarm" >
+            android:title="Reminder Alarm" android:enabled="false">
 			
             <CheckBoxPreference
                 android:defaultValue="false"

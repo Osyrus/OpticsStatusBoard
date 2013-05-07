@@ -47,13 +47,4 @@ public class PeopleArrayAdapter extends ArrayAdapter<Person> {
 		
 		return personRow;
 	}
-	
-//	private void loadBitmap(int resId, ImageView imageView) {
-//	    if (BitmapWorkerTask.cancelPotentialWork(resId, imageView)) {
-//	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, activity);
-//	        final AsyncDrawable asyncDrawable = new AsyncDrawable(activity.getResources(), null, task);
-//	        imageView.setImageDrawable(asyncDrawable);
-//	        task.execute(resId);
-//	    }
-//	}
 }

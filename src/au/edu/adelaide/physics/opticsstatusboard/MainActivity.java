@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -38,7 +39,7 @@ public class MainActivity extends Activity {
 	private ArrayAdapter<Person> peopleAdapter;
 	private boolean networking, statusChanged, newVersion, reminderEnabled;
 	private ListView peopleList;
-	private ImageButton refreshButton, inButton, outButton, confButton, lunchButton, sickButton, vacButton, setMessageButton;
+	private ImageButton refreshButton, statusButton, setMessageButton;
 	private Button setBackMessageButton;
 	private Person user;
 	private String userInput, webAddress, updateFileURL;
@@ -182,51 +183,17 @@ public class MainActivity extends Activity {
 			}
 		});
         
-        inButton = (ImageButton) findViewById(R.id.in_button);
-        inButton.setOnClickListener(new View.OnClickListener() {
+        statusButton = (ImageButton) findViewById(R.id.statusButton);
+        statusButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setStatus(1);
-			}
-		});
-        
-        outButton = (ImageButton) findViewById(R.id.out_button);
-        outButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setStatus(0);
-			}
-		});
-        
-        confButton = (ImageButton) findViewById(R.id.conf_button);
-        confButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setStatus(0);
-			}
-		});
-        
-        lunchButton = (ImageButton) findViewById(R.id.lunch_button);
-        lunchButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setStatus(0);
-			}
-		});
-        
-        sickButton = (ImageButton) findViewById(R.id.sick_button);
-        sickButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setStatus(0);
-			}
-		});
-        
-        vacButton = (ImageButton) findViewById(R.id.vac_button);
-        vacButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setStatus(0);
+				if (user != null) {
+					if (user.getStatus() == 0) {
+						setStatus(1);
+					} else {
+						setStatus(0);
+					}
+				}
 			}
 		});
         
@@ -412,35 +379,42 @@ public class MainActivity extends Activity {
     	if (statusButtonCurrent != status) {
     		statusButtonCurrent = status;
     		
-    		findViewById(R.id.in_button).setVisibility(View.GONE);
-    		findViewById(R.id.out_button).setVisibility(View.GONE);
-    		findViewById(R.id.conf_button).setVisibility(View.GONE);
-    		findViewById(R.id.lunch_button).setVisibility(View.GONE);
-    		findViewById(R.id.sick_button).setVisibility(View.GONE);
-    		findViewById(R.id.vac_button).setVisibility(View.GONE);
+    		ImageView imageView = (ImageView) findViewById(R.id.statusButton);
+    		int imageId = 0;
 
     		switch (status) {
     		case 0:
-    			findViewById(R.id.in_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.in;
     			break;
     		case 1:
-    			findViewById(R.id.out_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.out;
     			break;
     		case 2:
-    			findViewById(R.id.conf_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.meeting;
     			break;
     		case 3:
-    			findViewById(R.id.lunch_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.lunch;
     			break;
     		case 4:
-    			findViewById(R.id.sick_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.sick;
     			break;
     		case 5:
-    			findViewById(R.id.vac_button).setVisibility(View.VISIBLE);
+    			imageId = R.drawable.vacation;
     			break;
     		default:
     			// TODO What should it do in this case?
     		}
+    		
+    		loadBitmap(imageId, imageView, this);
+    	}
+    }
+    
+    private void loadBitmap(int resId, ImageView imageView, Context context) {
+    	if (BitmapWorkerTask.cancelPotentialWork(resId, imageView)) {
+    		final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context);
+    		final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), null, task);
+    		imageView.setImageDrawable(asyncDrawable);
+    		task.execute(resId);
     	}
     }
     

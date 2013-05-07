@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -293,39 +292,38 @@ public class BackgroundManager extends IntentService {
     	views.setTextViewText(R.id.inCounterW, "In: "+Integer.toString(counter));
     }
     private void setWidgetImage(int status, RemoteViews views) {
-    	views.setViewVisibility(R.id.inButtonW, View.GONE);
-    	views.setViewVisibility(R.id.outButtonW, View.GONE);
-    	views.setViewVisibility(R.id.confButtonW, View.GONE);
-    	views.setViewVisibility(R.id.lunchButtonW, View.GONE);
-    	views.setViewVisibility(R.id.sickButtonW, View.GONE);
-    	views.setViewVisibility(R.id.vacButtonW, View.GONE);
-    	
-    	switch (status) {
-    	case 0:
-    		views.setViewVisibility(R.id.inButtonW, View.VISIBLE);
-    		break;
-    	case 1:
-    		views.setViewVisibility(R.id.outButtonW, View.VISIBLE);
-    		break;
-    	case 2:
-    		views.setViewVisibility(R.id.confButtonW, View.VISIBLE);
-    		break;
-    	case 3:
-    		views.setViewVisibility(R.id.lunchButtonW, View.VISIBLE);
-    		break;
-    	case 4:
-    		views.setViewVisibility(R.id.sickButtonW, View.VISIBLE);
-    		break;
-    	case 5:
-    		views.setViewVisibility(R.id.vacButtonW, View.VISIBLE);
-    		break;
-    	default:
-    		// TODO What should it do in this case?
-    	}
+		int imageId = 0;
+
+		switch (status) {
+		case 0:
+			imageId = R.drawable.in;
+			break;
+		case 1:
+			imageId = R.drawable.out;
+			break;
+		case 2:
+			imageId = R.drawable.meeting;
+			break;
+		case 3:
+			imageId = R.drawable.lunch;
+			break;
+		case 4:
+			imageId = R.drawable.sick;
+			break;
+		case 5:
+			imageId = R.drawable.vacation;
+			break;
+		default:
+			// TODO What should it do in this case?
+		}
+		
+		views.setImageViewResource(R.id.statusButtonW, imageId);
     }
+    
     public void showToast(String data) {
     	Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
     }
+    
     private void updateWidget() {
     	if (user != null) {
     		Context context = getApplicationContext();
@@ -338,19 +336,15 @@ public class BackgroundManager extends IntentService {
     			Intent signInIntent = new Intent(context, BackgroundManager.class);
     			signInIntent.putExtra("widgetSignIn", true);
     			PendingIntent pendingSignInIntent = PendingIntent.getService(context, 0, signInIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-    			remoteViews.setOnClickPendingIntent(R.id.outButtonW, pendingSignInIntent);
-    			remoteViews.setOnClickPendingIntent(R.id.vacButtonW, pendingSignInIntent);
-    			remoteViews.setOnClickPendingIntent(R.id.confButtonW, pendingSignInIntent);
-    			remoteViews.setOnClickPendingIntent(R.id.lunchButtonW, pendingSignInIntent);
-    			remoteViews.setOnClickPendingIntent(R.id.sickButtonW, pendingSignInIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.statusButtonW, pendingSignInIntent);    			
     		} else {
     			//And to sign out
     			Intent signOutIntent = new Intent(context, BackgroundManager.class);
     			signOutIntent.putExtra("widgetSignIn", false);
     			PendingIntent pendingSignOutIntent = PendingIntent.getService(context, 0, signOutIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-    			remoteViews.setOnClickPendingIntent(R.id.inButtonW, pendingSignOutIntent);
+    			remoteViews.setOnClickPendingIntent(R.id.statusButtonW, pendingSignOutIntent);
     		}
-
+    		
     		setWidgetImage(user.getStatus(), remoteViews);
     		setWidgetCounter(remoteViews);
 

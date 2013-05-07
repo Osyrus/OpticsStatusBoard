@@ -12,69 +12,15 @@
         android:orientation="vertical" >
 
         <ImageButton
-            android:id="@+id/inButtonW"
+            android:id="@+id/statusButtonW"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@null"
-            android:contentDescription="@string/in"
+            android:contentDescription="@string/statusButton"
             android:scaleType="fitCenter"
             android:src="@drawable/in"
-            android:text="@string/in" />
+            android:text="@string/statusButton" />
 
-        <ImageButton
-            android:id="@+id/outButtonW"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:contentDescription="@string/out"
-            android:scaleType="fitCenter"
-            android:src="@drawable/out"
-            android:text="@string/out"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/confButtonW"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:contentDescription="@string/conf"
-            android:scaleType="fitCenter"
-            android:src="@drawable/meeting"
-            android:text="@string/conf"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/lunchButtonW"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:contentDescription="@string/lunch"
-            android:scaleType="fitCenter"
-            android:src="@drawable/lunch"
-            android:text="@string/lunch"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/sickButtonW"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:contentDescription="@string/sick"
-            android:scaleType="fitCenter"
-            android:src="@drawable/sick"
-            android:text="@string/sick"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/vacButtonW"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:contentDescription="@string/vac"
-            android:scaleType="fitCenter"
-            android:src="@drawable/vacation"
-            android:text="@string/vac"
-            android:visibility="gone" />
     </LinearLayout>
 
 	<TextView
