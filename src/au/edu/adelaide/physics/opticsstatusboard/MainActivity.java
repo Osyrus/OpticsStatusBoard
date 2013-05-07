@@ -247,6 +247,12 @@ public class MainActivity extends Activity {
     		}
         	
         	return true;
+    	case R.id.websiteLink:
+    		Intent websiteLink = new Intent(Intent.ACTION_VIEW);
+			websiteLink.setData(Uri.parse(webAddress));
+			startActivity(websiteLink);
+    		
+    		return true;
     	case R.id.setSignOutTime:
     		refreshUserData();
     		

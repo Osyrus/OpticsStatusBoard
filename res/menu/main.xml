@@ -3,7 +3,7 @@
     <item
         android:id="@+id/setStatusOption"
         android:orderInCategory="1"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom"
         android:title="@string/setStatusOption" />
     
     <item
@@ -12,7 +12,7 @@
         android:showAsAction="never"
         android:title="@string/setSignOutTime" android:enabled="false" android:visible="true"/>
     
-    <item
+    <item android:id="@+id/websiteLink" android:orderInCategory="98" android:title="@string/websiteLink" android:showAsAction="never"></item><item
         android:id="@+id/versionButton"
         android:orderInCategory="99"
         android:showAsAction="never"
@@ -23,5 +23,6 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings" />
+    
 
 </menu>
