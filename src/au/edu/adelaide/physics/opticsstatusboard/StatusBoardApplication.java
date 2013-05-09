@@ -9,7 +9,7 @@ import org.acra.annotation.*;
 				resNotifTickerText = R.string.crashTickerText,
                 resNotifTitle = R.string.crashTitle,
                 resNotifText = R.string.crashText,
-                resDialogTitle = R.string.crashDialogTitle,
+                resDialogText = R.string.crashDialogTitle,
                 resDialogCommentPrompt = R.string.crashDialogComment)
 public class StatusBoardApplication extends Application {
 	public void onCreate() {
