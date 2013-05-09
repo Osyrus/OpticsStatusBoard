@@ -39,7 +39,7 @@ public class BackgroundManager extends IntentService {
     }
 	
 	private void checkForUpdate() {
-    	new UpdateChecker(this).check(updateWebsite);
+		new UpdateChecker(this).check(updateWebsite);
     }
 	
 	private void createNotification(int type, boolean param) {
