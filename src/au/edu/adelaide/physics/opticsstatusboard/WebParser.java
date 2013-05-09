@@ -2,12 +2,20 @@ package au.edu.adelaide.physics.opticsstatusboard;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.jsoup.nodes.Document;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
@@ -41,16 +49,38 @@ public class WebParser {
 		return currentUser;
 	}
 	
+	public static InputStream getResp(URL url) throws IOException, URISyntaxException
+	{
+		HttpGet httpGet = new HttpGet(url.toURI());
+		HttpParams httpParameters = new BasicHttpParams();
+		// Set the timeout in milliseconds until a connection is established.
+		// The default value is zero, that means the timeout is not used. 
+		int timeoutConnection = 10000;
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		// Set the default socket timeout (SO_TIMEOUT) 
+		// in milliseconds which is the timeout for waiting for data.
+		int timeoutSocket = 15000;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+
+		DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
+		HttpResponse response = httpClient.execute(httpGet);
+		
+		return response.getEntity().getContent();
+	}
+	
 	public void parseWebsite(URL website) {
 		preExecute();
 		
 		try {
-			input = new BufferedReader((new InputStreamReader(website.openStream())));
+			input = new BufferedReader((new InputStreamReader(getResp(website))));
 			input.readLine();
 			data = input.readLine();
 			input.close();
 		} catch (IOException e) {
 			System.out.println("IOException");
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			System.out.println("URI Conversion Exception");
 			e.printStackTrace();
 		}
 		

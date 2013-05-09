@@ -3,6 +3,7 @@ package au.edu.adelaide.physics.opticsstatusboard;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.jsoup.Jsoup;
@@ -27,7 +28,7 @@ public class UpdateChecker {
 		output[0] = "";
 		
 		try {
-			input = new BufferedReader((new InputStreamReader(updateWebsite.openStream())));
+			input = new BufferedReader((new InputStreamReader(WebParser.getResp(updateWebsite))));
 			
 			boolean ok = true;
 			while (ok) {
@@ -53,6 +54,9 @@ public class UpdateChecker {
 			System.out.println("IOException");
 			e.printStackTrace();
 			updateServerAvailable = false;
+		} catch (URISyntaxException e) {
+			System.out.println("URI Conversion Exception");
+			e.printStackTrace();
 		}
 		
 		postExecute(output);
@@ -61,6 +65,8 @@ public class UpdateChecker {
 	private void postExecute(String[] output) {
 		int currentVersion;
 		String appId = "au.edu.adelaide.physics.opticsstatusboard";
+		manager.notifyNewVersion(false);
+		
 		try {
 			currentVersion = manager.getPackageManager().getPackageInfo(appId, 0).versionCode;
 			
