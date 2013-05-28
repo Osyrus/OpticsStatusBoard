@@ -161,8 +161,9 @@ public class BackgroundManager extends IntentService {
 		Intent returnIntent = new Intent("BackgroundRefresh");
 		Bundle returnData = new Bundle();
 		
-		//If the service has been sent an updated user, post the changes to the sign in page
-		if (data != null) {
+		//If the service has been sent an updated user, post the changes to the sign in page,
+		//however only do this if the user is actually there (logged in/no connection issues).
+		if (data != null && user != null) {
 			if (data.containsKey("updatedUser")) {
 				user = (Person) data.getParcelable("updatedUser");
 				String result = postData();
@@ -181,10 +182,10 @@ public class BackgroundManager extends IntentService {
 			if (data.containsKey("widgetSignIn")) {
 				if (data.getBoolean("widgetSignIn")) {
 					user.setStatus(0);
-					showToast("Widget sign in request sent");
+//					showToast("Widget sign in request sent");
 				} else {
 					user.setStatus(1);
-					showToast("Widget sign out request sent");
+//					showToast("Widget sign out request sent");
 				}
 				
 				postData();
@@ -210,9 +211,9 @@ public class BackgroundManager extends IntentService {
 			if (data.containsKey("reminderAlarm") && reminderEnabled) {
 				if (reminderEnabled) {
 					if (data.getBoolean("reminderAlarm")) {
-						System.out.println("Reminder alarm to sign in went off");
+//						System.out.println("Reminder alarm to sign in went off");
 					} else {
-						System.out.println("Reminder alarm to sign out went off");
+//						System.out.println("Reminder alarm to sign out went off");
 						if (user.getStatus() == 0)
 							createNotification(1, false);
 					}
