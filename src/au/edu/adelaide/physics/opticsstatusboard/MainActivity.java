@@ -71,11 +71,15 @@ public class MainActivity extends Activity {
     public void notifyNewVersion(boolean newVersion) {
     	this.newVersion = newVersion;
     	
-    	if (newVersion) {
-    		showToast("New version available, download link available in menu");
-    		versionButton.setTitle("Download New Version");
+    	if (versionButton != null) {
+    		if (newVersion) {
+    			showToast("New version available, download link available in menu");
+    			versionButton.setTitle("Download New Version");
+    		} else {
+    			showToast("Currently up to date :)");
+    		}
     	} else {
-    		showToast("Currently up to date :)");
+    		requestUpdateCheck();
     	}
     }
     
