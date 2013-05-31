@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="au.edu.adelaide.physics.opticsstatusboard"
-    android:versionCode="42"
+    android:versionCode="43"
     android:versionName="@string/version" >
 
     <uses-sdk
@@ -49,7 +49,7 @@
             </intent-filter>
         </activity>
         
-        <receiver android:name=".BootReceiver" >
+        <receiver android:name="au.edu.adelaide.physics.opticsstatusboard.BootReceiver" >
 			<intent-filter>
     			<action android:name="android.intent.action.BOOT_COMPLETED" />
 			</intent-filter>

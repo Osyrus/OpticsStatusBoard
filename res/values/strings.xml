@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="version">v1.3.19</string>
+    <string name="version">v1.3.20</string>
    	<string name="versionButton">Check for Update</string>
     <string name="app_name">Optics Status Board</string>
     <string name="appAuthor">Myles Clark</string>
