@@ -57,6 +57,11 @@ public class UpdateChecker {
 		} catch (URISyntaxException e) {
 			System.out.println("URI Conversion Exception");
 			e.printStackTrace();
+			updateServerAvailable = false;
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("No data to parse?!");
+			e.printStackTrace();
+			updateServerAvailable = false;
 		}
 		
 		postExecute(output);
